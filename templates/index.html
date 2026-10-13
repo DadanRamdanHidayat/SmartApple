@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>SmartApple — Deteksi Penyakit Apel</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #080e0b;
+      --bg2:     #0d1710;
+      --bg3:     #111f15;
+      --surface: #172519;
+      --surface2:#1e3220;
+      --border:  rgba(74,222,128,0.1);
+      --border2: rgba(74,222,128,0.2);
+      --green:   #4ade80;
+      --green2:  #22c55e;
+      --green3:  #16a34a;
+      --green4:  #bbf7d0;
+      --accent:  #a3e635;
+      --text:    #f0fdf4;
+      --text2:   #86efac;
+      --muted:   #52615a;
+      --muted2:  #8a9e93;
+      --yellow:  #fbbf24;
+      --yellow2: #fef08a;
+      --red:     #f87171;
+      --red2:    #fee2e2;
+      --orange:  #fb923c;
+      --purple:  #c084fc;
+      --purple2: #f3e8ff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 99px; }
+
+    /* NAVBAR */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+      height: 60px; padding: 0 1rem;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(8,14,11,0.88);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.3s;
+    }
+    .nav-brand {
+      font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.1rem;
+      color: var(--green); text-decoration: none;
+      display: flex; align-items: center; gap: 7px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-brand i { font-size: 1.3rem; }
+    .nav-brand .nb { color: var(--text); }
+
+    .nav-right-mobile {
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    /* Language Toggle Button */
+    .lang-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--surface); border: 1px solid var(--border2);
+      color: var(--text2); font-family: 'Inter', sans-serif;
+      font-size: 0.75rem; font-weight: 700;
+      padding: 0.3rem 0.65rem; border-radius: 8px; cursor: pointer;
+      -webkit-tap-highlight-color: transparent; transition: all 0.2s;
+      letter-spacing: 0.5px;
+    }
+    .lang-btn:hover, .lang-btn:active { background: var(--surface2); border-color: var(--green); color: var(--green); }
+    .lang-btn i { font-size: 0.9rem; }
+
+    .nav-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; cursor: pointer; font-size: 1.3rem; color: var(--text);
+      -webkit-tap-highlight-color: transparent; transition: background 0.2s;
+    }
+    .nav-toggle:active { background: var(--surface2); }
+
+    .nav-links { display: none; list-style: none; }
+    .nav-right  { display: none; }
+
+    .nav-links.open {
+      display: flex; flex-direction: column;
+      position: fixed; top: 60px; left: 0; right: 0;
+      background: rgba(8,14,11,0.98);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+      gap: 0.15rem; z-index: 499;
+    }
+    .nav-link {
+      text-decoration: none; color: var(--muted2); font-size: 0.95rem;
+      font-weight: 500; padding: 0.7rem 0.85rem; border-radius: 10px;
+      transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-link:active { background: var(--surface); }
+    .nav-link.active { color: var(--green); background: rgba(74,222,128,0.08); }
+    .nav-link-cta {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: var(--green3); color: #fff;
+      font-weight: 700; font-size: 0.95rem; padding: 0.8rem;
+      border-radius: 10px; text-decoration: none; margin-top: 0.4rem;
+      -webkit-tap-highlight-color: transparent; transition: background 0.2s;
+    }
+    .nav-link-cta:active { background: var(--green2); }
+
+    @media (min-width: 768px) {
+      nav { height: 64px; padding: 0 2rem; }
+      .nav-toggle { display: none; }
+      .nav-right-mobile .nav-toggle { display: none; }
+      .nav-links {
+        display: flex !important; flex-direction: row;
+        position: static; background: none; border: none; padding: 0;
+        backdrop-filter: none; gap: 0.1rem;
+      }
+      .nav-link { font-size: 0.875rem; padding: 0.45rem 0.9rem; }
+      .nav-link:hover { color: var(--text); background: var(--surface); }
+      .nav-right { display: flex; align-items: center; gap: 0.75rem; }
+      .nav-cta {
+        display: inline-flex; align-items: center; gap: 7px;
+        background: var(--green3); color: #fff; font-size: 0.85rem; font-weight: 600;
+        padding: 0.5rem 1.1rem; border-radius: 8px; text-decoration: none;
+        transition: all 0.2s;
+      }
+      .nav-cta:hover { background: var(--green2); transform: translateY(-1px); }
+      .nav-link-cta { display: none; }
+      .nav-right-mobile { display: none; }
+    }
+
+    /* HERO */
+    .hero {
+      min-height: 100dvh;
+      padding: 7rem 1rem 3rem;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden; text-align: center;
+    }
+    .hero-glow {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 600px; height: 280px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(22,163,74,0.15) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .orb { position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none; }
+    .orb-1 { width: 200px; height: 200px; background: rgba(74,222,128,0.06); top: 5%; left: -8%; animation: orbf 9s ease-in-out infinite; }
+    .orb-2 { width: 160px; height: 160px; background: rgba(163,230,53,0.05); bottom: 8%; right: -8%; animation: orbf 11s ease-in-out infinite 4s; }
+    @keyframes orbf { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
+
+    .hero-inner { position: relative; z-index: 2; width: 100%; max-width: 800px; margin: 0 auto; }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(74,222,128,0.07); border: 1px solid var(--border2);
+      color: var(--green); font-size: 0.68rem; font-weight: 600;
+      padding: 0.32rem 0.85rem; border-radius: 99px; margin-bottom: 1.25rem;
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+
+    .hero-apple-icon {
+      font-size: 5rem; color: var(--green); display: block; margin: 0 auto 0.75rem;
+      filter: drop-shadow(0 0 40px rgba(74,222,128,0.45));
+      animation: apulse 3s ease-in-out infinite;
+    }
+    @keyframes apulse {
+      0%,100%{filter:drop-shadow(0 0 28px rgba(74,222,128,0.4));transform:scale(1)}
+      50%{filter:drop-shadow(0 0 52px rgba(74,222,128,0.65));transform:scale(1.05)}
+    }
+
+    .hero h1 {
+      font-size: clamp(2.6rem, 10vw, 5.5rem);
+      font-weight: 800; line-height: 1; letter-spacing: -2px; margin-bottom: 1rem;
+    }
+    .h1-white { color: var(--text); }
+    .h1-green { color: var(--green); }
+
+    .hero-sub {
+      color: var(--muted2); font-size: 0.92rem; max-width: 100%;
+      margin: 0 auto 1.75rem; line-height: 1.7;
+    }
+    .hero-sub strong { color: var(--text2); font-weight: 500; }
+
+    .hero-classes {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem;
+      margin-bottom: 1.75rem;
+    }
+    .hc-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 0.3rem 0.8rem; border-radius: 99px;
+      font-size: 0.72rem; font-weight: 700;
+    }
+    .hc-pill.normal { background: rgba(74,222,128,0.12); color: var(--green); border: 1px solid rgba(74,222,128,0.22); }
+    .hc-pill.blotch { background: rgba(251,191,36,0.1); color: var(--yellow); border: 1px solid rgba(251,191,36,0.2); }
+    .hc-pill.rot    { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+    .hc-pill.scab   { background: rgba(192,132,252,0.1); color: var(--purple); border: 1px solid rgba(192,132,252,0.2); }
+
+    .hero-btns {
+      display: flex; flex-direction: column; gap: 0.7rem;
+      margin-bottom: 2rem; width: 100%;
+    }
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      background: var(--green); color: #080e0b;
+      font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1rem;
+      padding: 0.95rem; border-radius: 12px;
+      text-decoration: none; border: none; width: 100%; min-height: 52px;
+      -webkit-tap-highlight-color: transparent; transition: all 0.2s;
+    }
+    .btn-primary:active { background: var(--accent); transform: scale(0.98); }
+    .btn-ghost {
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      background: transparent; color: var(--text2); font-weight: 500; font-size: 1rem;
+      padding: 0.95rem; border-radius: 12px;
+      text-decoration: none; border: 1px solid var(--border2); width: 100%; min-height: 52px;
+      -webkit-tap-highlight-color: transparent; transition: all 0.2s;
+    }
+    .btn-ghost:active { background: var(--surface); }
+
+    .hero-stats {
+      display: grid; grid-template-columns: 1fr 1fr;
+      border: 1px solid var(--border); border-radius: 14px;
+      overflow: hidden; background: var(--bg2); width: 100%;
+    }
+    .hs {
+      padding: 0.9rem 0.5rem; text-align: center;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .hs:nth-child(2) { border-right: none; }
+    .hs:nth-child(3) { border-bottom: none; }
+    .hs:nth-child(4) { border-right: none; border-bottom: none; }
+    .hs-val {
+      font-family: 'Inter', sans-serif; font-size: 1.35rem; font-weight: 800;
+      color: var(--green); line-height: 1;
+    }
+    .hs-lbl { font-size: 0.62rem; color: var(--muted); margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.4px; }
+
+    /* SECTIONS */
+    .sec { padding: 3rem 1rem; }
+    .sec-dark { background: var(--bg2); }
+    .container { max-width: 1060px; margin: 0 auto; }
+    hr.div { border: none; border-top: 1px solid var(--border); }
+
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--green); font-size: 0.68rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1.4px; margin-bottom: 0.5rem;
+    }
+    .sec-title {
+      font-size: clamp(1.45rem, 5.5vw, 2.5rem); font-weight: 800; color: var(--text);
+      letter-spacing: -0.8px; line-height: 1.1; margin-bottom: 0.5rem;
+    }
+    .sec-sub { color: var(--muted2); font-size: 0.87rem; line-height: 1.7; }
+
+    /* HOW IT WORKS */
+    .how-grid { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.75rem; }
+    .how-card {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.4rem; position: relative; overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .how-card:active { border-color: var(--border2); }
+    .how-bg-num {
+      font-family: 'Inter', sans-serif; font-size: 3.5rem; font-weight: 800;
+      color: rgba(74,222,128,0.05); position: absolute; bottom: 0.5rem; right: 1rem;
+      line-height: 1; user-select: none;
+    }
+    .how-icon-box {
+      width: 44px; height: 44px; border-radius: 11px;
+      background: rgba(74,222,128,0.09); border: 1px solid var(--border2);
+      display: flex; align-items: center; justify-content: center; margin-bottom: 0.85rem;
+    }
+    .how-icon-box i { font-size: 1.25rem; color: var(--green); }
+    .how-card h3 { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.35rem; }
+    .how-card p { font-size: 0.82rem; color: var(--muted2); line-height: 1.6; }
+
+    /* CLASSES */
+    .classes-grid { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.75rem; }
+    .class-card {
+      border-radius: 18px; padding: 1.5rem; position: relative; overflow: hidden;
+      transition: transform 0.2s;
+    }
+    .class-card:active { transform: scale(0.99); }
+    .class-card.normal { background: linear-gradient(145deg, #0c2115, #0f2a1a); border: 1px solid rgba(74,222,128,0.18); }
+    .class-card.blotch { background: linear-gradient(145deg, #1a160a, #221c0c); border: 1px solid rgba(251,191,36,0.18); }
+    .class-card.rot    { background: linear-gradient(145deg, #1c0c0c, #240f0f); border: 1px solid rgba(248,113,113,0.18); }
+    .class-card.scab   { background: linear-gradient(145deg, #170c1e, #1e0f28); border: 1px solid rgba(192,132,252,0.18); }
+    .class-glow {
+      position: absolute; top: -40px; right: -40px;
+      width: 160px; height: 160px; border-radius: 50%; filter: blur(50px);
+    }
+    .class-card.normal .class-glow { background: rgba(74,222,128,0.1); }
+    .class-card.blotch .class-glow { background: rgba(251,191,36,0.09); }
+    .class-card.rot    .class-glow { background: rgba(248,113,113,0.1); }
+    .class-card.scab   .class-glow { background: rgba(192,132,252,0.1); }
+    .class-head { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 0.85rem; }
+    .class-main-icon { font-size: 2.4rem; flex-shrink: 0; }
+    .class-card.normal .class-main-icon { color: var(--green); }
+    .class-card.blotch .class-main-icon { color: var(--yellow); }
+    .class-card.rot    .class-main-icon { color: var(--red); }
+    .class-card.scab   .class-main-icon { color: var(--purple); }
+    .class-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 0.22rem 0.7rem; border-radius: 99px;
+      font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px;
+    }
+    .class-card.normal .class-pill { background: rgba(74,222,128,0.12); color: var(--green); border: 1px solid rgba(74,222,128,0.22); }
+    .class-card.blotch .class-pill { background: rgba(251,191,36,0.1); color: var(--yellow); border: 1px solid rgba(251,191,36,0.2); }
+    .class-card.rot    .class-pill { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+    .class-card.scab   .class-pill { background: rgba(192,132,252,0.1); color: var(--purple); border: 1px solid rgba(192,132,252,0.2); }
+    .class-card h3 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 0.4rem; }
+    .class-card.normal h3 { color: var(--green4); }
+    .class-card.blotch h3 { color: var(--yellow2); }
+    .class-card.rot    h3 { color: var(--red2); }
+    .class-card.scab   h3 { color: var(--purple2); }
+    .class-card p { font-size: 0.82rem; color: var(--muted2); line-height: 1.6; margin-bottom: 0.85rem; }
+    .class-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .class-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 0.72rem; padding: 0.25rem 0.6rem; border-radius: 7px; font-weight: 500;
+    }
+    .class-card.normal .class-tag { background: rgba(74,222,128,0.08); color: var(--text2); border: 1px solid rgba(74,222,128,0.15); }
+    .class-card.blotch .class-tag { background: rgba(251,191,36,0.07); color: #fde68a; border: 1px solid rgba(251,191,36,0.15); }
+    .class-card.rot    .class-tag { background: rgba(248,113,113,0.07); color: #fecaca; border: 1px solid rgba(248,113,113,0.15); }
+    .class-card.scab   .class-tag { background: rgba(192,132,252,0.07); color: #e9d5ff; border: 1px solid rgba(192,132,252,0.15); }
+    .class-tag i { font-size: 0.8rem; }
+
+    /* OUTPUT */
+    .output-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 1.75rem; }
+    .output-card {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1rem;
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .output-icon {
+      width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
+      background: rgba(74,222,128,0.09); border: 1px solid var(--border2);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .output-icon i { font-size: 1rem; color: var(--green); }
+    .output-card h4 { font-size: 0.8rem; font-weight: 700; color: var(--text); }
+    .output-card p { font-size: 0.73rem; color: var(--muted2); line-height: 1.5; }
+
+    /* TECH */
+    .tech-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; margin-top: 1.75rem; }
+    .tech-card {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1rem 0.5rem; text-align: center;
+    }
+    .tech-card i { font-size: 1.6rem; color: var(--green); display: block; margin-bottom: 0.35rem; }
+    .tech-name { font-size: 0.73rem; font-weight: 700; color: var(--text); }
+    .tech-desc { font-size: 0.62rem; color: var(--muted); margin-top: 0.1rem; }
+
+    /* USERS */
+    .users-grid { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1.75rem; }
+    .user-card {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.1rem;
+      display: flex; gap: 0.85rem; align-items: flex-start;
+    }
+    .user-icon {
+      width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+      background: rgba(74,222,128,0.09); border: 1px solid var(--border2);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .user-icon i { font-size: 1.2rem; color: var(--green); }
+    .user-card h3 { font-size: 0.88rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; }
+    .user-card p { font-size: 0.78rem; color: var(--muted2); line-height: 1.55; }
+
+    /* CTA */
+    .cta-sec { background: var(--bg2); border-top: 1px solid var(--border); }
+    .cta-box { max-width: 680px; margin: 0 auto; text-align: center; padding: 3rem 1rem; }
+    .cta-glow-ring {
+      width: 260px; height: 80px; margin: 0 auto 1.75rem;
+      background: radial-gradient(ellipse, rgba(22,163,74,0.2) 0%, transparent 70%);
+    }
+    .cta-box h2 {
+      font-size: clamp(1.6rem, 6.5vw, 3rem); font-weight: 800;
+      letter-spacing: -1px; line-height: 1.1; color: var(--text); margin-bottom: 0.75rem;
+    }
+    .cta-box h2 em { font-style: normal; color: var(--green); }
+    .cta-box p { color: var(--muted2); font-size: 0.88rem; margin-bottom: 1.75rem; line-height: 1.65; }
+    .btn-cta {
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      background: var(--green); color: #080e0b;
+      font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1rem;
+      padding: 1rem; border-radius: 12px; text-decoration: none; min-height: 54px;
+      -webkit-tap-highlight-color: transparent; transition: all 0.2s;
+    }
+    .btn-cta:active { background: var(--accent); }
+
+    /* FOOTER */
+    footer {
+      background: var(--bg); border-top: 1px solid var(--border);
+      padding: 1.75rem 1rem;
+      padding-bottom: calc(1.75rem + env(safe-area-inset-bottom));
+    }
+    .foot-inner {
+      max-width: 1060px; margin: 0 auto;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 1rem; text-align: center;
+    }
+    .foot-brand {
+      font-family: 'Inter', sans-serif; font-weight: 800; font-size: 0.95rem;
+      color: var(--green); text-decoration: none; display: flex; align-items: center; gap: 7px;
+    }
+    .foot-links { display: flex; gap: 1.25rem; flex-wrap: wrap; justify-content: center; }
+    .foot-links a { color: var(--muted); font-size: 0.8rem; text-decoration: none; }
+    .foot-copy { color: var(--muted); font-size: 0.73rem; }
+
+    /* TABLET */
+    @media (min-width: 640px) {
+      .sec { padding: 4rem 1.5rem; }
+      .hero { padding: 8rem 1.5rem 4rem; }
+      .hero-apple-icon { font-size: 6.5rem; }
+      .hero-sub { font-size: 1rem; }
+      .hero-btns { flex-direction: row; justify-content: center; }
+      .btn-primary, .btn-ghost { width: auto; min-width: 180px; }
+      .hero-stats { grid-template-columns: repeat(4, 1fr); }
+      .hs { border-bottom: none; }
+      .hs:nth-child(2) { border-right: 1px solid var(--border); }
+      .how-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+      .classes-grid { display: grid; grid-template-columns: 1fr 1fr; }
+      .class-head { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .class-main-icon { font-size: 3rem; }
+      .output-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+      .tech-grid { grid-template-columns: repeat(4, 1fr); }
+      .users-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+      .foot-inner { flex-direction: row; justify-content: space-between; text-align: left; }
+    }
+
+    /* DESKTOP */
+    @media (min-width: 1024px) {
+      .sec { padding: 5.5rem 2rem; }
+      .hero { padding: 9rem 2rem 6rem; }
+      .hero-apple-icon { font-size: 7.5rem; }
+      .how-card:hover { border-color: var(--border2); transform: translateY(-5px); }
+      .how-card::after {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, var(--green3), transparent);
+        opacity: 0; transition: opacity 0.25s;
+      }
+      .how-card:hover::after { opacity: 1; }
+      .class-card:hover { transform: translateY(-6px); }
+      .output-card:hover { border-color: var(--border2); transform: translateY(-3px); }
+      .tech-card:hover { border-color: var(--border2); transform: translateY(-4px); }
+      .tech-grid { grid-template-columns: repeat(6, 1fr); }
+      .user-card:hover { border-color: var(--border2); transform: translateY(-4px); }
+      .btn-cta:hover { background: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(74,222,128,0.25); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="nav">
+  <a class="nav-brand" href="/"><i class="mdi mdi-food-apple"></i>Smart<span class="nb">Apple</span></a>
+
+  <!-- Mobile: lang toggle + hamburger -->
+  <div class="nav-right-mobile">
+    <button class="lang-btn" onclick="toggleLang()" id="lang-btn-mobile" aria-label="Toggle language">
+      <i class="mdi mdi-translate"></i> <span id="lang-label-mobile">EN</span>
+    </button>
+    <button class="nav-toggle" onclick="toggleMenu()" aria-label="Menu">
+      <i class="mdi mdi-menu" id="menu-icon"></i>
+    </button>
+  </div>
+
+  <ul class="nav-links" id="nav-links">
+    <li><a href="/" class="nav-link active"><i class="mdi mdi-home-outline"></i> <span data-i18n="nav.home">Beranda</span></a></li>
+    <li><a href="/deteksi" class="nav-link"><i class="mdi mdi-magnify-scan"></i> <span data-i18n="nav.detect">Deteksi</span></a></li>
+    <li><a href="/riwayat" class="nav-link"><i class="mdi mdi-history"></i> <span data-i18n="nav.history">Riwayat</span></a></li>
+    <li><a href="/tentang" class="nav-link"><i class="mdi mdi-information-outline"></i> <span data-i18n="nav.about">Tentang</span></a></li>
+    <a href="/deteksi" class="nav-link-cta"><i class="mdi mdi-magnify-scan"></i> <span data-i18n="nav.cta">Deteksi Sekarang</span></a>
+  </ul>
+
+  <div class="nav-right">
+    <button class="lang-btn" onclick="toggleLang()" id="lang-btn-desktop" aria-label="Toggle language">
+      <i class="mdi mdi-translate"></i> <span id="lang-label-desktop">EN</span>
+    </button>
+    <a href="/deteksi" class="nav-cta"><i class="mdi mdi-magnify-scan"></i> <span data-i18n="nav.cta">Deteksi Sekarang</span></a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="hero-inner">
+    <div class="hero-badge" data-aos="fade-down" data-aos-duration="600">
+      <i class="mdi mdi-shimmer"></i> MobileNetV2 · <span data-i18n="hero.badge">Akurasi 98%</span>
+    </div>
+    <i class="mdi mdi-food-apple hero-apple-icon" data-aos="zoom-in" data-aos-delay="100" data-aos-duration="700"></i>
+    <h1 data-aos="fade-up" data-aos-delay="180">
+      <span class="h1-white">Smart</span><span class="h1-green">Apple</span>
+    </h1>
+    <p class="hero-sub" data-aos="fade-up" data-aos-delay="240" data-i18n-html="hero.sub">
+      Sistem deteksi penyakit buah apel berbasis web — unggah foto, dapatkan klasifikasi <strong>Normal, Blotch, Rot, atau Scab</strong> dalam hitungan detik.
+    </p>
+    <div class="hero-classes" data-aos="fade-up" data-aos-delay="300">
+      <span class="hc-pill normal"><i class="mdi mdi-check-circle"></i> <span data-i18n="pill.normal">Normal</span></span>
+      <span class="hc-pill blotch"><i class="mdi mdi-bacteria-outline"></i> <span data-i18n="pill.blotch">Blotch</span></span>
+      <span class="hc-pill rot"><i class="mdi mdi-emoticon-dead-outline"></i> <span data-i18n="pill.rot">Rot</span></span>
+      <span class="hc-pill scab"><i class="mdi mdi-virus-outline"></i> <span data-i18n="pill.scab">Scab</span></span>
+    </div>
+    <div class="hero-btns" data-aos="fade-up" data-aos-delay="360">
+      <a href="/deteksi" class="btn-primary"><i class="mdi mdi-magnify-scan"></i> <span data-i18n="hero.btnPrimary">Mulai Deteksi</span></a>
+      <a href="/tentang" class="btn-ghost"><i class="mdi mdi-information-outline"></i> <span data-i18n="hero.btnGhost">Pelajari Lebih</span></a>
+    </div>
+    <div class="hero-stats" data-aos="fade-up" data-aos-delay="420">
+      <div class="hs"><div class="hs-val">98%</div><div class="hs-lbl" data-i18n="hero.stat1">Akurasi</div></div>
+      <div class="hs"><div class="hs-val">&lt;5s</div><div class="hs-lbl" data-i18n="hero.stat2">Respon</div></div>
+      <div class="hs"><div class="hs-val">4</div><div class="hs-lbl" data-i18n="hero.stat3">Kelas</div></div>
+      <div class="hs"><div class="hs-val">100%</div><div class="hs-lbl" data-i18n="hero.stat4">Web</div></div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- HOW IT WORKS -->
+<section class="sec">
+  <div class="container">
+    <div data-aos="fade-up">
+      <div class="eyebrow"><i class="mdi mdi-layers-outline"></i> <span data-i18n="how.eyebrow">Alur Sistem</span></div>
+      <h2 class="sec-title" data-i18n="how.title">Tiga Langkah Mudah</h2>
+      <p class="sec-sub" data-i18n="how.sub">Tidak perlu keahlian teknis — cukup foto apel dan biarkan AI bekerja.</p>
+    </div>
+    <div class="how-grid">
+      <div class="how-card" data-aos="fade-up" data-aos-delay="80">
+        <div class="how-bg-num">01</div>
+        <div class="how-icon-box"><i class="mdi mdi-image-plus-outline"></i></div>
+        <h3 data-i18n="how.step1.title">Upload Gambar</h3>
+        <p data-i18n="how.step1.desc">Pilih atau ambil foto apel dari perangkat. Mendukung JPG, PNG hingga 5 MB.</p>
+      </div>
+      <div class="how-card" data-aos="fade-up" data-aos-delay="150">
+        <div class="how-bg-num">02</div>
+        <div class="how-icon-box"><i class="mdi mdi-brain"></i></div>
+        <h3 data-i18n="how.step2.title">Analisis MobileNetV2</h3>
+        <p data-i18n="how.step2.desc">Model deep learning mengekstrak fitur visual — warna, tekstur, pola bercak — lalu mengklasifikasi ke 4 kelas.</p>
+      </div>
+      <div class="how-card" data-aos="fade-up" data-aos-delay="220">
+        <div class="how-bg-num">03</div>
+        <div class="how-icon-box"><i class="mdi mdi-chart-bar"></i></div>
+        <h3 data-i18n="how.step3.title">Hasil &amp; Rekomendasi</h3>
+        <p data-i18n="how.step3.desc">Terima label penyakit, confidence score, tingkat keparahan, dan panduan penanganan.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- DETECTION CLASSES -->
+<section class="sec sec-dark">
+  <div class="container">
+    <div data-aos="fade-up">
+      <div class="eyebrow"><i class="mdi mdi-tag-multiple-outline"></i> <span data-i18n="classes.eyebrow">Klasifikasi AI</span></div>
+      <h2 class="sec-title" data-i18n="classes.title">4 Kelas Penyakit Apel</h2>
+      <p class="sec-sub" data-i18n="classes.sub">Model mengklasifikasikan kondisi apel berdasarkan pola visual seperti warna, tekstur, dan bercak penyakit.</p>
+    </div>
+    <div class="classes-grid">
+
+      <!-- NORMAL -->
+      <div class="class-card normal" data-aos="fade-up" data-aos-delay="80">
+        <div class="class-glow"></div>
+        <div class="class-head">
+          <i class="mdi mdi-food-apple class-main-icon"></i>
+          <div class="class-pill"><i class="mdi mdi-check-circle"></i> <span data-i18n="pill.normal">Normal</span></div>
+        </div>
+        <h3 data-i18n="classes.normal.title">Normal Apple</h3>
+        <p data-i18n="classes.normal.desc">Apel sehat tanpa indikasi penyakit. Warna merah/hijau cerah dan tekstur kulit mulus optimal.</p>
+        <div class="class-tags">
+          <span class="class-tag"><i class="mdi mdi-shield-check"></i> <span data-i18n="classes.normal.tag1">Sehat</span></span>
+          <span class="class-tag"><i class="mdi mdi-food-apple"></i> <span data-i18n="classes.normal.tag2">Layak konsumsi</span></span>
+          <span class="class-tag"><i class="mdi mdi-star"></i> <span data-i18n="classes.normal.tag3">Kualitas tinggi</span></span>
+        </div>
+      </div>
+
+      <!-- BLOTCH -->
+      <div class="class-card blotch" data-aos="fade-up" data-aos-delay="130">
+        <div class="class-glow"></div>
+        <div class="class-head">
+          <i class="mdi mdi-bacteria-outline class-main-icon"></i>
+          <div class="class-pill"><i class="mdi mdi-alert-circle"></i> <span data-i18n="pill.blotch">Blotch</span></div>
+        </div>
+        <h3 data-i18n="classes.blotch.title">Blotch Apple</h3>
+        <p data-i18n="classes.blotch.desc">Bercak hitam tidak beraturan akibat infeksi jamur <em>Phyllosticta solitaria</em>. Menurunkan kualitas visual.</p>
+        <div class="class-tags">
+          <span class="class-tag"><i class="mdi mdi-eye-outline"></i> <span data-i18n="classes.blotch.tag1">Bercak hitam</span></span>
+          <span class="class-tag"><i class="mdi mdi-bug-outline"></i> <span data-i18n="classes.blotch.tag2">Infeksi jamur</span></span>
+          <span class="class-tag"><i class="mdi mdi-alert"></i> <span data-i18n="classes.blotch.tag3">Perlu penanganan</span></span>
+        </div>
+      </div>
+
+      <!-- ROT -->
+      <div class="class-card rot" data-aos="fade-up" data-aos-delay="180">
+        <div class="class-glow"></div>
+        <div class="class-head">
+          <i class="mdi mdi-emoticon-dead-outline class-main-icon"></i>
+          <div class="class-pill"><i class="mdi mdi-skull-outline"></i> <span data-i18n="pill.rot">Rot</span></div>
+        </div>
+        <h3 data-i18n="classes.rot.title">Rot Apple</h3>
+        <p data-i18n="classes.rot.desc">Pembusukan dengan tekstur lunak, perubahan warna ekstrem. Tidak layak dikonsumsi sama sekali.</p>
+        <div class="class-tags">
+          <span class="class-tag"><i class="mdi mdi-close-circle"></i> <span data-i18n="classes.rot.tag1">Busuk</span></span>
+          <span class="class-tag"><i class="mdi mdi-alert-octagon"></i> <span data-i18n="classes.rot.tag2">Bahaya konsumsi</span></span>
+          <span class="class-tag"><i class="mdi mdi-delete"></i> <span data-i18n="classes.rot.tag3">Buang</span></span>
+        </div>
+      </div>
+
+      <!-- SCAB -->
+      <div class="class-card scab" data-aos="fade-up" data-aos-delay="230">
+        <div class="class-glow"></div>
+        <div class="class-head">
+          <i class="mdi mdi-texture class-main-icon"></i>
+          <div class="class-pill"><i class="mdi mdi-virus-outline"></i> <span data-i18n="pill.scab">Scab</span></div>
+        </div>
+        <h3 data-i18n="classes.scab.title">Scab Apple</h3>
+        <p data-i18n="classes.scab.desc">Jamur <em>Venturia inaequalis</em> menyebabkan tekstur kasar dan bercak gelap berbatas tegas di kulit.</p>
+        <div class="class-tags">
+          <span class="class-tag"><i class="mdi mdi-texture-box"></i> <span data-i18n="classes.scab.tag1">Permukaan kasar</span></span>
+          <span class="class-tag"><i class="mdi mdi-bacteria"></i> <span data-i18n="classes.scab.tag2">Infeksi jamur</span></span>
+          <span class="class-tag"><i class="mdi mdi-tools"></i> <span data-i18n="classes.scab.tag3">Perlu perawatan</span></span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- OUTPUT -->
+    <div style="margin-top:2rem;" data-aos="fade-up">
+      <div class="eyebrow"><i class="mdi mdi-export-variant"></i> <span data-i18n="output.eyebrow">Output AI</span></div>
+      <h3 class="sec-title" style="font-size:clamp(1.1rem,4vw,1.4rem);" data-i18n="output.title">Informasi Hasil Deteksi</h3>
+    </div>
+    <div class="output-grid">
+      <div class="output-card" data-aos="fade-up" data-aos-delay="60">
+        <div class="output-icon"><i class="mdi mdi-tag-outline"></i></div>
+        <div><h4 data-i18n="output.o1.title">Klasifikasi</h4><p data-i18n="output.o1.desc">Normal, Blotch, Rot, atau Scab</p></div>
+      </div>
+      <div class="output-card" data-aos="fade-up" data-aos-delay="100">
+        <div class="output-icon"><i class="mdi mdi-percent-outline"></i></div>
+        <div><h4 data-i18n="output.o2.title">Confidence</h4><p data-i18n="output.o2.desc">Tingkat keyakinan model (0–100%)</p></div>
+      </div>
+      <div class="output-card" data-aos="fade-up" data-aos-delay="140">
+        <div class="output-icon"><i class="mdi mdi-alert-decagram-outline"></i></div>
+        <div><h4 data-i18n="output.o3.title">Keparahan</h4><p data-i18n="output.o3.desc">Tingkat kerusakan buah</p></div>
+      </div>
+      <div class="output-card" data-aos="fade-up" data-aos-delay="180">
+        <div class="output-icon"><i class="mdi mdi-lightbulb-on-outline"></i></div>
+        <div><h4 data-i18n="output.o4.title">Rekomendasi</h4><p data-i18n="output.o4.desc">Konsumsi, perawatan, atau buang</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- TECH STACK -->
+<section class="sec">
+  <div class="container">
+    <div data-aos="fade-up">
+      <div class="eyebrow"><i class="mdi mdi-code-braces"></i> <span data-i18n="tech.eyebrow">Teknologi</span></div>
+      <h2 class="sec-title" data-i18n="tech.title">Stack yang Digunakan</h2>
+      <p class="sec-sub" data-i18n="tech.sub">Teknologi modern untuk performa 98% dan kemudahan akses dari browser manapun.</p>
+    </div>
+    <div class="tech-grid">
+      <div class="tech-card" data-aos="zoom-in" data-aos-delay="40"><i class="mdi mdi-language-python"></i><div class="tech-name">Python</div><div class="tech-desc" data-i18n="tech.py">Backend & ML</div></div>
+      <div class="tech-card" data-aos="zoom-in" data-aos-delay="80"><i class="mdi mdi-flask-outline"></i><div class="tech-name">Flask</div><div class="tech-desc" data-i18n="tech.flask">Framework</div></div>
+      <div class="tech-card" data-aos="zoom-in" data-aos-delay="120"><i class="mdi mdi-robot"></i><div class="tech-name">TensorFlow</div><div class="tech-desc" data-i18n="tech.tf">Deep Learning</div></div>
+      <div class="tech-card" data-aos="zoom-in" data-aos-delay="160"><i class="mdi mdi-layers-triple-outline"></i><div class="tech-name">MobileNetV2</div><div class="tech-desc" data-i18n="tech.mn">CNN</div></div>
+      <div class="tech-card" data-aos="zoom-in" data-aos-delay="200"><i class="mdi mdi-language-html5"></i><div class="tech-name">HTML/CSS/JS</div><div class="tech-desc" data-i18n="tech.html">Frontend</div></div>
+      <div class="tech-card" data-aos="zoom-in" data-aos-delay="240"><i class="mdi mdi-database-outline"></i><div class="tech-name">SQLite</div><div class="tech-desc" data-i18n="tech.db">Riwayat</div></div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- TARGET USERS -->
+<section class="sec sec-dark">
+  <div class="container">
+    <div data-aos="fade-up">
+      <div class="eyebrow"><i class="mdi mdi-account-group-outline"></i> <span data-i18n="users.eyebrow">Pengguna</span></div>
+      <h2 class="sec-title" data-i18n="users.title">Untuk Siapa?</h2>
+      <p class="sec-sub" data-i18n="users.sub">Dirancang agar siapa saja bisa pakai tanpa keahlian teknis.</p>
+    </div>
+    <div class="users-grid">
+      <div class="user-card" data-aos="fade-up" data-aos-delay="70">
+        <div class="user-icon"><i class="mdi mdi-sprout-outline"></i></div>
+        <div>
+          <h3 data-i18n="users.u1.title">Petani Apel</h3>
+          <p data-i18n="users.u1.desc">Deteksi dini Blotch, Rot, dan Scab sebelum menyebar ke seluruh kebun.</p>
+        </div>
+      </div>
+      <div class="user-card" data-aos="fade-up" data-aos-delay="130">
+        <div class="user-icon"><i class="mdi mdi-shopping-outline"></i></div>
+        <div>
+          <h3 data-i18n="users.u2.title">Konsumen</h3>
+          <p data-i18n="users.u2.desc">Pastikan apel yang dibeli benar-benar Normal — cukup foto dari ponsel.</p>
+        </div>
+      </div>
+      <div class="user-card" data-aos="fade-up" data-aos-delay="190">
+        <div class="user-icon"><i class="mdi mdi-school-outline"></i></div>
+        <div>
+          <h3 data-i18n="users.u3.title">Mahasiswa &amp; Peneliti</h3>
+          <p data-i18n="users.u3.desc">Platform eksplorasi AI di bidang patologi tanaman dan agrikultur modern.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-sec">
+  <div class="cta-box">
+    <div class="cta-glow-ring"></div>
+    <h2 data-aos="fade-up">Coba <em>SmartApple</em><br><span data-i18n="cta.headline">Sekarang — Gratis</span></h2>
+    <p data-aos="fade-up" data-aos-delay="80" data-i18n="cta.sub">Upload foto apel dan dapatkan klasifikasi penyakit lengkap dalam hitungan detik. Tanpa registrasi.</p>
+    <div data-aos="fade-up" data-aos-delay="160">
+      <a href="/deteksi" class="btn-cta"><i class="mdi mdi-magnify-scan"></i> <span data-i18n="cta.btn">Mulai Deteksi Sekarang</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-inner">
+    <a href="/" class="foot-brand"><i class="mdi mdi-food-apple"></i> SmartApple</a>
+    <div class="foot-links">
+      <a href="/" data-i18n="nav.home">Beranda</a>
+      <a href="/deteksi" data-i18n="nav.detect">Deteksi</a>
+      <a href="/riwayat" data-i18n="nav.history">Riwayat</a>
+      <a href="/tentang" data-i18n="nav.about">Tentang</a>
+    </div>
+    <div class="foot-copy">&copy; 2026 SmartApple — Powered by DRAM</div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script>
+  /* =========================================================
+     i18n TRANSLATIONS
+  ========================================================= */
+  const translations = {
+    id: {
+      "nav.home": "Beranda",
+      "nav.detect": "Deteksi",
+      "nav.history": "Riwayat",
+      "nav.about": "Tentang",
+      "nav.cta": "Deteksi Sekarang",
+
+      "hero.badge": "Akurasi 98%",
+      "hero.sub": "Sistem deteksi penyakit buah apel berbasis web — unggah foto, dapatkan klasifikasi <strong>Normal, Blotch, Rot, atau Scab</strong> dalam hitungan detik.",
+      "hero.btnPrimary": "Mulai Deteksi",
+      "hero.btnGhost": "Pelajari Lebih",
+      "hero.stat1": "Akurasi",
+      "hero.stat2": "Respon",
+      "hero.stat3": "Kelas",
+      "hero.stat4": "Web",
+
+      "how.eyebrow": "Alur Sistem",
+      "how.title": "Tiga Langkah Mudah",
+      "how.sub": "Tidak perlu keahlian teknis — cukup foto apel dan biarkan AI bekerja.",
+      "how.step1.title": "Upload Gambar",
+      "how.step1.desc": "Pilih atau ambil foto apel dari perangkat. Mendukung JPG, PNG hingga 5 MB.",
+      "how.step2.title": "Analisis MobileNetV2",
+      "how.step2.desc": "Model deep learning mengekstrak fitur visual — warna, tekstur, pola bercak — lalu mengklasifikasi ke 4 kelas.",
+      "how.step3.title": "Hasil & Rekomendasi",
+      "how.step3.desc": "Terima label penyakit, confidence score, tingkat keparahan, dan panduan penanganan.",
+
+      "classes.eyebrow": "Klasifikasi AI",
+      "classes.title": "4 Kelas Penyakit Apel",
+      "classes.sub": "Model mengklasifikasikan kondisi apel berdasarkan pola visual seperti warna, tekstur, dan bercak penyakit.",
+      "classes.normal.desc": "Apel sehat tanpa indikasi penyakit. Warna merah/hijau cerah dan tekstur kulit mulus optimal.",
+      "classes.normal.tag1": "Sehat",
+      "classes.normal.tag2": "Layak konsumsi",
+      "classes.normal.tag3": "Kualitas tinggi",
+      "classes.blotch.desc": "Bercak hitam tidak beraturan akibat infeksi jamur <em>Phyllosticta solitaria</em>. Menurunkan kualitas visual.",
+      "classes.blotch.tag1": "Bercak hitam",
+      "classes.blotch.tag2": "Infeksi jamur",
+      "classes.blotch.tag3": "Perlu penanganan",
+      "classes.rot.desc": "Pembusukan dengan tekstur lunak, perubahan warna ekstrem. Tidak layak dikonsumsi sama sekali.",
+      "classes.rot.tag1": "Busuk",
+      "classes.rot.tag2": "Bahaya konsumsi",
+      "classes.rot.tag3": "Buang",
+      "classes.scab.desc": "Jamur <em>Venturia inaequalis</em> menyebabkan tekstur kasar dan bercak gelap berbatas tegas di kulit.",
+      "classes.scab.tag1": "Permukaan kasar",
+      "classes.scab.tag2": "Infeksi jamur",
+      "classes.scab.tag3": "Perlu perawatan",
+
+      "output.eyebrow": "Output AI",
+      "output.title": "Informasi Hasil Deteksi",
+      "output.o1.title": "Klasifikasi",
+      "output.o1.desc": "Normal, Blotch, Rot, atau Scab",
+      "output.o2.title": "Confidence",
+      "output.o2.desc": "Tingkat keyakinan model (0–100%)",
+      "output.o3.title": "Keparahan",
+      "output.o3.desc": "Tingkat kerusakan buah",
+      "output.o4.title": "Rekomendasi",
+      "output.o4.desc": "Konsumsi, perawatan, atau buang",
+
+      "tech.eyebrow": "Teknologi",
+      "tech.title": "Stack yang Digunakan",
+      "tech.sub": "Teknologi modern untuk performa 98% dan kemudahan akses dari browser manapun.",
+      "tech.py": "Backend & ML",
+      "tech.flask": "Framework",
+      "tech.tf": "Deep Learning",
+      "tech.mn": "CNN",
+      "tech.html": "Frontend",
+      "tech.db": "Riwayat",
+
+      "users.eyebrow": "Pengguna",
+      "users.title": "Untuk Siapa?",
+      "users.sub": "Dirancang agar siapa saja bisa pakai tanpa keahlian teknis.",
+      "users.u1.title": "Petani Apel",
+      "users.u1.desc": "Deteksi dini Blotch, Rot, dan Scab sebelum menyebar ke seluruh kebun.",
+      "users.u2.title": "Konsumen",
+      "users.u2.desc": "Pastikan apel yang dibeli benar-benar Normal — cukup foto dari ponsel.",
+      "users.u3.title": "Mahasiswa & Peneliti",
+      "users.u3.desc": "Platform eksplorasi AI di bidang patologi tanaman dan agrikultur modern.",
+
+      "cta.headline": "Sekarang — Gratis",
+      "cta.sub": "Upload foto apel dan dapatkan klasifikasi penyakit lengkap dalam hitungan detik. Tanpa registrasi.",
+      "cta.btn": "Mulai Deteksi Sekarang",
+      // Bahasa Indonesia
+      "pill.normal": "Normal",
+      "pill.blotch": "Jamur",
+      "pill.rot": "Busuk",
+      "pill.scab": "Kudis",
+      // Indonesia
+      "classes.normal.title": "Apel Normal",
+      "classes.blotch.title": "Apel Berjamur",
+      "classes.rot.title": "Apel Busuk",
+      "classes.scab.title": "Apel Kudis",
+    },
+
+    en: {
+      "nav.home": "Home",
+      "nav.detect": "Detect",
+      "nav.history": "History",
+      "nav.about": "About",
+      "nav.cta": "Detect Now",
+
+      "hero.badge": "98% Accuracy",
+      "hero.sub": "A web-based apple disease detection system — upload a photo, get a <strong>Normal, Blotch, Rot, or Scab</strong> classification in seconds.",
+      "hero.btnPrimary": "Start Detection",
+      "hero.btnGhost": "Learn More",
+      "hero.stat1": "Accuracy",
+      "hero.stat2": "Response",
+      "hero.stat3": "Classes",
+      "hero.stat4": "Web",
+
+      "how.eyebrow": "System Flow",
+      "how.title": "Three Simple Steps",
+      "how.sub": "No technical expertise needed — just photograph the apple and let the AI do the work.",
+      "how.step1.title": "Upload Image",
+      "how.step1.desc": "Select or capture an apple photo from your device. Supports JPG, PNG up to 5 MB.",
+      "how.step2.title": "MobileNetV2 Analysis",
+      "how.step2.desc": "The deep learning model extracts visual features — color, texture, spot patterns — then classifies into 4 classes.",
+      "how.step3.title": "Results & Recommendations",
+      "how.step3.desc": "Receive a disease label, confidence score, severity level, and handling guidelines.",
+
+      "classes.eyebrow": "AI Classification",
+      "classes.title": "4 Apple Disease Classes",
+      "classes.sub": "The model classifies apple conditions based on visual patterns such as color, texture, and disease spots.",
+      "classes.normal.desc": "Healthy apple with no signs of disease. Bright red/green color and smooth skin texture at optimal quality.",
+      "classes.normal.tag1": "Healthy",
+      "classes.normal.tag2": "Safe to eat",
+      "classes.normal.tag3": "High quality",
+      "classes.blotch.desc": "Irregular black spots caused by <em>Phyllosticta solitaria</em> fungal infection. Reduces visual quality.",
+      "classes.blotch.tag1": "Black spots",
+      "classes.blotch.tag2": "Fungal infection",
+      "classes.blotch.tag3": "Needs treatment",
+      "classes.rot.desc": "Decay with soft texture and extreme color change. Not safe for consumption at all.",
+      "classes.rot.tag1": "Rotten",
+      "classes.rot.tag2": "Consumption hazard",
+      "classes.rot.tag3": "Discard",
+      "classes.scab.desc": "<em>Venturia inaequalis</em> fungus causes rough texture and sharply defined dark spots on the skin.",
+      "classes.scab.tag1": "Rough surface",
+      "classes.scab.tag2": "Fungal infection",
+      "classes.scab.tag3": "Needs care",
+
+      "output.eyebrow": "AI Output",
+      "output.title": "Detection Result Info",
+      "output.o1.title": "Classification",
+      "output.o1.desc": "Normal, Blotch, Rot, or Scab",
+      "output.o2.title": "Confidence",
+      "output.o2.desc": "Model certainty level (0–100%)",
+      "output.o3.title": "Severity",
+      "output.o3.desc": "Level of fruit damage",
+      "output.o4.title": "Recommendation",
+      "output.o4.desc": "Consume, treat, or discard",
+
+      "tech.eyebrow": "Technology",
+      "tech.title": "Stack Used",
+      "tech.sub": "Modern technology for 98% performance and easy access from any browser.",
+      "tech.py": "Backend & ML",
+      "tech.flask": "Framework",
+      "tech.tf": "Deep Learning",
+      "tech.mn": "CNN",
+      "tech.html": "Frontend",
+      "tech.db": "History",
+
+      "users.eyebrow": "Users",
+      "users.title": "Who Is It For?",
+      "users.sub": "Designed so anyone can use it without technical expertise.",
+      "users.u1.title": "Apple Farmers",
+      "users.u1.desc": "Early detection of Blotch, Rot, and Scab before it spreads across the orchard.",
+      "users.u2.title": "Consumers",
+      "users.u2.desc": "Ensure the apple you're buying is truly Normal — just snap a photo from your phone.",
+      "users.u3.title": "Students & Researchers",
+      "users.u3.desc": "An AI exploration platform in the field of plant pathology and modern agriculture.",
+
+      "cta.headline": "Now — Free",
+      "cta.sub": "Upload an apple photo and get a complete disease classification in seconds. No registration required.",
+      "cta.btn": "Start Detection Now",
+      // Bahasa Inggris
+      "pill.normal": "Normal",
+      "pill.blotch": "Blotch",
+      "pill.rot": "Rot",
+      "pill.scab": "Scab",
+      // English
+      "classes.normal.title": "Normal Apple",
+      "classes.blotch.title": "Blotch Apple",
+      "classes.rot.title": "Rot Apple",
+      "classes.scab.title": "Scab Apple",
+    }
+  };
+
+  /* =========================================================
+     LANGUAGE ENGINE
+  ========================================================= */
+  let currentLang = localStorage.getItem('sa-lang') || 'id';
+
+  function applyLang(lang) {
+    const t = translations[lang];
+    document.documentElement.lang = lang;
+
+    // Standard text nodes
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (t[key] !== undefined) el.textContent = t[key];
+    });
+
+    // HTML nodes (for content with tags like <strong>, <em>)
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      const key = el.getAttribute('data-i18n-html');
+      if (t[key] !== undefined) el.innerHTML = t[key];
+    });
+
+    // Update lang button labels
+    const nextLang = lang === 'id' ? 'EN' : 'ID';
+    document.querySelectorAll('#lang-label-mobile, #lang-label-desktop').forEach(el => {
+      el.textContent = nextLang;
+    });
+
+    // Update page title
+    document.title = lang === 'id'
+      ? 'SmartApple — Deteksi Penyakit Apel'
+      : 'SmartApple — Apple Disease Detection';
+  }
+
+  function toggleLang() {
+    currentLang = currentLang === 'id' ? 'en' : 'id';
+    localStorage.setItem('sa-lang', currentLang);
+    applyLang(currentLang);
+  }
+
+  // Apply on load
+  applyLang(currentLang);
+
+  /* =========================================================
+     NAV & SCROLL
+  ========================================================= */
+  AOS.init({ duration: 600, once: true, offset: 30 });
+
+  function toggleMenu() {
+    const nl = document.getElementById('nav-links');
+    const ic = document.getElementById('menu-icon');
+    const isOpen = nl.classList.toggle('open');
+    ic.className = isOpen ? 'mdi mdi-close' : 'mdi mdi-menu';
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  }
+
+  document.querySelectorAll('.nav-link, .nav-link-cta').forEach(link => {
+    link.addEventListener('click', () => {
+      document.getElementById('nav-links').classList.remove('open');
+      document.getElementById('menu-icon').className = 'mdi mdi-menu';
+      document.body.style.overflow = '';
+    });
+  });
+
+  document.addEventListener('click', e => {
+    const nl = document.getElementById('nav-links');
+    const toggle = document.querySelector('.nav-toggle');
+    if (nl.classList.contains('open') && !nl.contains(e.target) && !toggle.contains(e.target)) {
+      nl.classList.remove('open');
+      document.getElementById('menu-icon').className = 'mdi mdi-menu';
+      document.body.style.overflow = '';
+    }
+  });
+
+  window.addEventListener('scroll', () => {
+    document.getElementById('nav').style.background =
+      window.scrollY > 40 ? 'rgba(8,14,11,0.97)' : 'rgba(8,14,11,0.88)';
+  }, { passive: true });
+</script>
+</body>
+</html>

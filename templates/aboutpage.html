@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>SmartApple — Tentang Sistem</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:      #080e0b;
+      --bg2:     #0d1710;
+      --bg3:     #111f15;
+      --surface: #172519;
+      --surface2:#1e3220;
+      --border:  rgba(74,222,128,0.1);
+      --border2: rgba(74,222,128,0.2);
+      --green:   #4ade80;
+      --green2:  #22c55e;
+      --green3:  #16a34a;
+      --green4:  #bbf7d0;
+      --accent:  #a3e635;
+      --text:    #f0fdf4;
+      --text2:   #86efac;
+      --muted:   #52615a;
+      --muted2:  #8a9e93;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--green3); }
+
+    /* NAVBAR */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+      height: 60px; padding: 0 1rem;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(8,14,11,0.88);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.3s;
+    }
+    .nav-brand {
+      font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.1rem;
+      color: var(--green); text-decoration: none;
+      display: flex; align-items: center; gap: 7px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-brand i { font-size: 1.3rem; }
+    .nav-brand .nb { color: var(--text); }
+
+    .nav-right-mobile {
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    .lang-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--surface); border: 1px solid var(--border2);
+      color: var(--text2); font-family: 'Inter', sans-serif;
+      font-size: 0.75rem; font-weight: 700;
+      padding: 0.3rem 0.65rem; border-radius: 8px; cursor: pointer;
+      -webkit-tap-highlight-color: transparent; transition: all 0.2s;
+      letter-spacing: 0.5px;
+    }
+    .lang-btn:hover, .lang-btn:active { background: var(--surface2); border-color: var(--green); color: var(--green); }
+    .lang-btn i { font-size: 0.9rem; }
+
+    .nav-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; cursor: pointer; font-size: 1.3rem; color: var(--text);
+      -webkit-tap-highlight-color: transparent; transition: background 0.2s;
+    }
+    .nav-toggle:active { background: var(--surface2); }
+
+    .nav-links { display: none; list-style: none; }
+    .nav-right  { display: none; }
+
+    .nav-links.open {
+      display: flex; flex-direction: column;
+      position: fixed; top: 60px; left: 0; right: 0;
+      background: rgba(8,14,11,0.98);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+      gap: 0.15rem; z-index: 499;
+    }
+    .nav-link {
+      text-decoration: none; color: var(--muted2); font-size: 0.95rem;
+      font-weight: 500; padding: 0.7rem 0.85rem; border-radius: 10px;
+      transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-link:active { background: var(--surface); }
+    .nav-link.active { color: var(--green); background: rgba(74,222,128,0.08); }
+    .nav-link-cta {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: var(--green3); color: #fff;
+      font-weight: 700; font-size: 0.95rem; padding: 0.8rem;
+      border-radius: 10px; text-decoration: none; margin-top: 0.4rem;
+      -webkit-tap-highlight-color: transparent; transition: background 0.2s;
+    }
+    .nav-link-cta:active { background: var(--green2); }
+
+    @media (min-width: 768px) {
+      nav { height: 64px; padding: 0 2rem; }
+      .nav-toggle { display: none; }
+      .nav-right-mobile .nav-toggle { display: none; }
+      .nav-links {
+        display: flex !important; flex-direction: row;
+        position: static; background: none; border: none; padding: 0;
+        backdrop-filter: none; gap: 0.1rem;
+      }
+      .nav-link { font-size: 0.875rem; padding: 0.45rem 0.9rem; }
+      .nav-link:hover { color: var(--text); background: var(--surface); }
+      .nav-right { display: flex; align-items: center; gap: 0.75rem; }
+      .nav-cta {
+        display: inline-flex; align-items: center; gap: 7px;
+        background: var(--green3); color: #fff; font-size: 0.85rem; font-weight: 600;
+        padding: 0.5rem 1.1rem; border-radius: 8px; text-decoration: none;
+        border: 1px solid rgba(255,255,255,0.08); transition: all 0.2s;
+      }
+      .nav-cta:hover { background: var(--green2); transform: translateY(-1px); }
+      .nav-link-cta { display: none; }
+      .nav-right-mobile { display: none; }
+    }
+
+    /* PAGE HEADER */
+    .page-header {
+      padding: 5.5rem 1rem 2.5rem; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .page-header::before {
+      content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 600px; height: 280px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(22,163,74,0.15) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .orb { position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none; }
+    .orb-1 { width: 180px; height: 180px; background: rgba(74,222,128,0.06); top: 5%; left: -5%; animation: orbf 9s ease-in-out infinite; }
+    .orb-2 { width: 140px; height: 140px; background: rgba(163,230,53,0.05); bottom: 5%; right: -5%; animation: orbf 11s ease-in-out infinite 4s; }
+    @keyframes orbf { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-16px)} }
+
+    .ph-inner { position: relative; z-index: 2; }
+    .ph-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(74,222,128,0.07); border: 1px solid var(--border2);
+      color: var(--green); font-size: 0.68rem; font-weight: 600;
+      padding: 0.32rem 0.85rem; border-radius: 99px; margin-bottom: 1rem;
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .page-header h1 {
+      font-size: clamp(1.7rem, 7vw, 2.8rem); font-weight: 800;
+      letter-spacing: -1px; color: var(--text); margin-bottom: 0.55rem;
+      display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+    }
+    .page-header h1 i { color: var(--green); font-size: clamp(1.5rem, 6vw, 2.2rem); }
+    .page-header p { color: var(--muted2); font-size: 0.9rem; max-width: 480px; margin: 0 auto; }
+
+    @media (min-width: 768px) { .page-header { padding: 7.5rem 2rem 3.5rem; } }
+
+    /* MAIN */
+    .main { max-width: 1060px; margin: 0 auto; padding: 2.5rem 1rem 5rem; }
+    @media (min-width: 768px) { .main { padding: 4rem 2rem 6rem; } }
+
+    .sec { margin-bottom: 3rem; }
+    .sec:last-of-type { margin-bottom: 0; }
+
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--green); font-size: 0.68rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1.4px; margin-bottom: 0.45rem;
+    }
+    .sec-title {
+      font-size: clamp(1.3rem, 4.5vw, 2rem); font-weight: 800;
+      color: var(--text); letter-spacing: -0.6px; line-height: 1.15; margin-bottom: 0.4rem;
+    }
+    .section-divider {
+      height: 3px; width: 48px; background: var(--green);
+      border-radius: 99px; margin-bottom: 1.5rem;
+    }
+
+    .sec-body { color: var(--muted2); font-size: 0.9rem; line-height: 1.75; }
+    .sec-body + .sec-body { margin-top: 0.75rem; }
+    .sec-body strong { color: var(--text2); font-weight: 600; }
+
+    .info-card {
+      background: rgba(74,222,128,0.06); border: 1px solid var(--border2);
+      border-radius: 16px; padding: 1.35rem 1.5rem;
+      display: flex; gap: 14px; align-items: flex-start; margin-top: 1.25rem;
+    }
+    .info-card i { font-size: 1.75rem; color: var(--green); flex-shrink: 0; margin-top: 2px; }
+    .info-card-body { display: flex; flex-direction: column; gap: 0.2rem; }
+    .info-card-title { font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 700; color: var(--text); }
+    .info-card-text  { font-size: 0.85rem; color: var(--muted2); line-height: 1.6; }
+
+    .acc-banner { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1.25rem; }
+    .acc-item {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.1rem 1.4rem; flex: 1; min-width: 120px; text-align: center;
+    }
+    .acc-val { font-family: 'Inter', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--green); line-height: 1; }
+    .acc-lbl { font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .tech-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem; margin-top: 1.35rem;
+    }
+    @media (min-width: 540px) { .tech-grid { grid-template-columns: repeat(4, 1fr); } }
+    @media (min-width: 768px) { .tech-grid { grid-template-columns: repeat(6, 1fr); } }
+
+    .tech-card {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.1rem 0.5rem; text-align: center;
+      transition: all 0.2s; -webkit-tap-highlight-color: transparent;
+    }
+    .tech-card:active  { border-color: var(--border2); transform: translateY(-2px); }
+    .tech-card:hover   { border-color: var(--border2); transform: translateY(-4px); }
+    .tech-card i { font-size: 1.6rem; color: var(--green); display: block; margin-bottom: 0.35rem; }
+    .tech-name { font-size: 0.72rem; font-weight: 700; color: var(--text); }
+    .tech-desc { font-size: 0.6rem; color: var(--muted); margin-top: 0.1rem; }
+
+    .goal-list { list-style: none; display: flex; flex-direction: column; gap: 0.9rem; margin-top: 0.5rem; }
+    .goal-list li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 0.9rem; color: var(--muted2); line-height: 1.6;
+    }
+    .goal-list li i { color: var(--green); font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+
+    .team-grid {
+      display: grid; grid-template-columns: 1fr;
+      gap: 0.85rem; margin-top: 1.35rem;
+    }
+    @media (min-width: 480px) { .team-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 768px) { .team-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .team-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.35rem; text-align: center;
+      transition: border-color 0.2s;
+    }
+    .team-card:hover { border-color: var(--border2); }
+    .team-avatar {
+      width: 54px; height: 54px; border-radius: 50%; margin: 0 auto 0.75rem;
+      background: rgba(74,222,128,0.1); border: 2px solid var(--border2);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .team-avatar i { font-size: 1.5rem; color: var(--green); }
+    .team-name { font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 700; color: var(--text); }
+    .team-role { font-size: 0.75rem; color: var(--muted2); margin-top: 0.2rem; }
+    .team-nim  { font-size: 0.68rem; color: var(--muted);  margin-top: 0.1rem; }
+
+    .cta-sec {
+      margin-top: 3.5rem;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 22px; overflow: hidden; position: relative;
+    }
+    .cta-glow {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 80%; height: 180px;
+      background: radial-gradient(ellipse, rgba(22,163,74,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-inner { position: relative; z-index: 2; padding: 3rem 1.25rem; text-align: center; }
+    @media (min-width: 640px) { .cta-inner { padding: 3.5rem 2.5rem; } }
+
+    .cta-inner h2 {
+      font-size: clamp(1.4rem, 5.5vw, 2.2rem); font-weight: 800;
+      color: var(--text); letter-spacing: -0.8px; line-height: 1.15; margin-bottom: 0.65rem;
+    }
+    .cta-inner h2 em { font-style: normal; color: var(--green); }
+    .cta-inner p { color: var(--muted2); font-size: 0.88rem; margin-bottom: 1.75rem; max-width: 420px; margin-left: auto; margin-right: auto; }
+    .btn-cta {
+      display: inline-flex; align-items: center; gap: 9px;
+      background: var(--green); color: #080e0b;
+      font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.95rem;
+      padding: 0.9rem 2rem; border-radius: 12px; text-decoration: none; min-height: 50px;
+      -webkit-tap-highlight-color: transparent; transition: all 0.2s;
+    }
+    .btn-cta:active { background: var(--accent); transform: scale(0.98); }
+    .btn-cta:hover  { background: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(74,222,128,0.2); }
+
+    /* FOOTER */
+    footer {
+      background: var(--bg); border-top: 1px solid var(--border);
+      padding: 1.75rem 1rem;
+      padding-bottom: calc(1.75rem + env(safe-area-inset-bottom));
+    }
+    .foot-inner {
+      max-width: 1060px; margin: 0 auto;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 1rem; text-align: center;
+    }
+    .foot-brand {
+      font-family: 'Inter', sans-serif; font-weight: 800; font-size: 0.95rem;
+      color: var(--green); text-decoration: none; display: flex; align-items: center; gap: 7px;
+    }
+    .foot-links { display: flex; gap: 1.25rem; flex-wrap: wrap; justify-content: center; }
+    .foot-links a { color: var(--muted); font-size: 0.8rem; text-decoration: none; }
+    .foot-links a:hover { color: var(--green); }
+    .foot-copy { color: var(--muted); font-size: 0.73rem; }
+
+    @media (min-width: 640px) {
+      footer { padding: 2rem 2rem; }
+      .foot-inner { flex-direction: row; justify-content: space-between; text-align: left; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══ NAVBAR ══ -->
+  <nav id="nav">
+    <a class="nav-brand" href="/"><i class="mdi mdi-food-apple"></i>Smart<span class="nb">Apple</span></a>
+
+    <!-- Mobile: lang toggle + hamburger -->
+    <div class="nav-right-mobile">
+      <button class="lang-btn" onclick="toggleLang()" id="lang-btn-mobile" aria-label="Toggle language">
+        <i class="mdi mdi-translate"></i> <span id="lang-label-mobile">EN</span>
+      </button>
+      <button class="nav-toggle" onclick="toggleMenu()" aria-label="Menu">
+        <i class="mdi mdi-menu" id="menu-icon"></i>
+      </button>
+    </div>
+
+    <ul class="nav-links" id="nav-links">
+      <li><a href="/"        class="nav-link"><i class="mdi mdi-home-outline"></i> <span data-i18n="nav.home">Beranda</span></a></li>
+      <li><a href="/deteksi" class="nav-link"><i class="mdi mdi-magnify-scan"></i> <span data-i18n="nav.detect">Deteksi</span></a></li>
+      <li><a href="/riwayat" class="nav-link"><i class="mdi mdi-history"></i> <span data-i18n="nav.history">Riwayat</span></a></li>
+      <li><a href="/tentang" class="nav-link active"><i class="mdi mdi-information-outline"></i> <span data-i18n="nav.about">Tentang</span></a></li>
+      <a href="/deteksi" class="nav-link-cta"><i class="mdi mdi-magnify-scan"></i> <span data-i18n="nav.cta">Deteksi Sekarang</span></a>
+    </ul>
+
+    <div class="nav-right">
+      <button class="lang-btn" onclick="toggleLang()" id="lang-btn-desktop" aria-label="Toggle language">
+        <i class="mdi mdi-translate"></i> <span id="lang-label-desktop">EN</span>
+      </button>
+      <a href="/deteksi" class="nav-cta"><i class="mdi mdi-magnify-scan"></i> <span data-i18n="nav.cta">Deteksi Sekarang</span></a>
+    </div>
+  </nav>
+
+  <!-- ══ PAGE HEADER ══ -->
+  <div class="page-header">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="ph-inner">
+      <div class="ph-badge" data-aos="fade-down">
+        <i class="mdi mdi-shimmer"></i> <span data-i18n="page.badge">MobileNetV2 · Akurasi 98%</span>
+      </div>
+      <h1 data-aos="fade-up" data-aos-delay="80">
+        <i class="mdi mdi-information-outline"></i> <span data-i18n="page.title">Tentang SmartApple</span>
+      </h1>
+      <p data-aos="fade-up" data-aos-delay="140" data-i18n="page.sub">
+        Sistem deteksi penyakit buah apel berbasis web menggunakan deep learning
+      </p>
+    </div>
+  </div>
+
+  <!-- ══ MAIN ══ -->
+  <div class="main">
+
+    <!-- Deskripsi -->
+    <section class="sec" data-aos="fade-up">
+      <div class="eyebrow"><i class="mdi mdi-text-box-outline"></i> <span data-i18n="desc.eyebrow">Deskripsi</span></div>
+      <h2 class="sec-title" data-i18n="desc.title">Tentang Proyek</h2>
+      <div class="section-divider"></div>
+      <p class="sec-body" data-i18n-html="desc.body1">
+        <strong>SmartApple</strong> adalah aplikasi berbasis web yang membantu petani, konsumen, dan peneliti
+        mengidentifikasi kondisi buah apel hanya dengan mengunggah foto.
+      </p>
+      <p class="sec-body" style="margin-top:0.75rem;" data-i18n-html="desc.body2">
+        Sistem ini mengklasifikasikan apel ke dalam empat kelas: <strong>Normal</strong>, <strong>Blotch</strong>,
+        <strong>Rot</strong>, dan <strong>Scab</strong> — lengkap dengan confidence score, tingkat keparahan,
+        dan rekomendasi penanganan.
+      </p>
+
+      <!-- Accuracy banner -->
+      <div class="acc-banner" data-aos="fade-up" data-aos-delay="80">
+        <div class="acc-item">
+          <div class="acc-val">98%</div>
+          <div class="acc-lbl" data-i18n="stat.accuracy">Akurasi Model</div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-val">4</div>
+          <div class="acc-lbl" data-i18n="stat.classes">Kelas Deteksi</div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-val">&lt;5s</div>
+          <div class="acc-lbl" data-i18n="stat.response">Waktu Respon</div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-val">100%</div>
+          <div class="acc-lbl" data-i18n="stat.web">Berbasis Web</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Metode -->
+    <section class="sec" data-aos="fade-up">
+      <div class="eyebrow"><i class="mdi mdi-brain"></i> <span data-i18n="method.eyebrow">Model AI</span></div>
+      <h2 class="sec-title" data-i18n="method.title">Metode yang Digunakan</h2>
+      <div class="section-divider"></div>
+      <div class="info-card">
+        <i class="mdi mdi-layers-triple-outline"></i>
+        <div class="info-card-body">
+          <div class="info-card-title" data-i18n="method.card1.title">MobileNetV2 — Transfer Learning</div>
+          <div class="info-card-text" data-i18n="method.card1.text">
+            Arsitektur CNN yang ringan dan efisien, dilatih ulang menggunakan transfer learning
+            pada dataset penyakit apel. Dirancang untuk performa tinggi di lingkungan web
+            tanpa membutuhkan hardware khusus.
+          </div>
+        </div>
+      </div>
+      <div class="info-card" style="margin-top:0.85rem;">
+        <i class="mdi mdi-image-search-outline"></i>
+        <div class="info-card-body">
+          <div class="info-card-title" data-i18n="method.card2.title">Deteksi Visual Berbasis Pola</div>
+          <div class="info-card-text" data-i18n="method.card2.text">
+            Model mengekstrak fitur visual seperti warna, tekstur, dan pola bercak dari gambar,
+            lalu mengklasifikasikannya ke salah satu dari 4 kelas penyakit apel secara otomatis.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tech Stack -->
+    <section class="sec" data-aos="fade-up">
+      <div class="eyebrow"><i class="mdi mdi-code-braces"></i> <span data-i18n="tech.eyebrow">Teknologi</span></div>
+      <h2 class="sec-title" data-i18n="tech.title">Stack yang Digunakan</h2>
+      <div class="section-divider"></div>
+      <div class="tech-grid">
+        <div class="tech-card" data-aos="zoom-in" data-aos-delay="40">
+          <i class="mdi mdi-language-python"></i>
+          <div class="tech-name">Python</div>
+          <div class="tech-desc" data-i18n="tech.py">Backend &amp; ML</div>
+        </div>
+        <div class="tech-card" data-aos="zoom-in" data-aos-delay="80">
+          <i class="mdi mdi-flask-outline"></i>
+          <div class="tech-name">Flask</div>
+          <div class="tech-desc" data-i18n="tech.flask">Framework</div>
+        </div>
+        <div class="tech-card" data-aos="zoom-in" data-aos-delay="120">
+          <i class="mdi mdi-robot"></i>
+          <div class="tech-name">TensorFlow</div>
+          <div class="tech-desc" data-i18n="tech.tf">Deep Learning</div>
+        </div>
+        <div class="tech-card" data-aos="zoom-in" data-aos-delay="160">
+          <i class="mdi mdi-layers-triple-outline"></i>
+          <div class="tech-name">MobileNetV2</div>
+          <div class="tech-desc" data-i18n="tech.mn">CNN</div>
+        </div>
+        <div class="tech-card" data-aos="zoom-in" data-aos-delay="200">
+          <i class="mdi mdi-language-html5"></i>
+          <div class="tech-name">HTML/CSS/JS</div>
+          <div class="tech-desc" data-i18n="tech.html">Frontend</div>
+        </div>
+        <div class="tech-card" data-aos="zoom-in" data-aos-delay="240">
+          <i class="mdi mdi-database-outline"></i>
+          <div class="tech-name">SQLite</div>
+          <div class="tech-desc" data-i18n="tech.db">Riwayat</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tujuan -->
+    <section class="sec" data-aos="fade-up">
+      <div class="eyebrow"><i class="mdi mdi-flag-checkered"></i> <span data-i18n="goals.eyebrow">Tujuan</span></div>
+      <h2 class="sec-title" data-i18n="goals.title">Tujuan Pengembangan</h2>
+      <div class="section-divider"></div>
+      <ul class="goal-list" id="goal-list">
+        <!-- Rendered by JS so it can be swapped per language -->
+      </ul>
+    </section>
+
+    <!-- Tim -->
+    <section class="sec" data-aos="fade-up">
+      <div class="eyebrow"><i class="mdi mdi-account-group-outline"></i> <span data-i18n="team.eyebrow">Tim</span></div>
+      <h2 class="sec-title" data-i18n="team.title">Pengembang</h2>
+      <div class="section-divider"></div>
+      <div class="team-grid">
+        <div class="team-card" data-aos="fade-up" data-aos-delay="60">
+          <div class="team-avatar"><i class="mdi mdi-account-outline"></i></div>
+          <div class="team-name">Dadan</div>
+          <div class="team-role" data-i18n="team.role1">Machine Learning</div>
+        </div>
+        <div class="team-card" data-aos="fade-up" data-aos-delay="110">
+          <div class="team-avatar"><i class="mdi mdi-account-outline"></i></div>
+          <div class="team-name">Ramdan</div>
+          <div class="team-role" data-i18n="team.role2">Backend Developer</div>
+        </div>
+        <div class="team-card" data-aos="fade-up" data-aos-delay="160">
+          <div class="team-avatar"><i class="mdi mdi-account-outline"></i></div>
+          <div class="team-name">Hidayat</div>
+          <div class="team-role" data-i18n="team.role3">Frontend Developer</div>
+        </div>
+        <div class="team-card" data-aos="fade-up" data-aos-delay="210">
+          <div class="team-avatar"><i class="mdi mdi-account-outline"></i></div>
+          <div class="team-name">Team</div>
+          <div class="team-role" data-i18n="team.role4">Data &amp; Dokumentasi</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <div class="cta-sec" data-aos="fade-up">
+      <div class="cta-glow"></div>
+      <div class="cta-inner">
+        <h2>Coba <em>SmartApple</em><br><span data-i18n="cta.headline">Sekarang — Gratis</span></h2>
+        <p data-i18n="cta.sub">Upload foto apel dan dapatkan klasifikasi penyakit lengkap dalam hitungan detik. Tanpa registrasi.</p>
+        <a href="/deteksi" class="btn-cta"><i class="mdi mdi-magnify-scan"></i> <span data-i18n="cta.btn">Mulai Deteksi Sekarang</span></a>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+
+  <!-- ══ FOOTER ══ -->
+  <footer>
+    <div class="foot-inner">
+      <a href="/" class="foot-brand"><i class="mdi mdi-food-apple"></i> SmartApple</a>
+      <div class="foot-links">
+        <a href="/" data-i18n="nav.home">Beranda</a>
+        <a href="/deteksi" data-i18n="nav.detect">Deteksi</a>
+        <a href="/riwayat" data-i18n="nav.history">Riwayat</a>
+        <a href="/tentang" data-i18n="nav.about">Tentang</a>
+      </div>
+      <div class="foot-copy">&copy; 2026 SmartApple — Powered by DRAM</div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+  <script>
+    /* =========================================================
+       i18n TRANSLATIONS
+    ========================================================= */
+    const translations = {
+      id: {
+        "nav.home":    "Beranda",
+        "nav.detect":  "Deteksi",
+        "nav.history": "Riwayat",
+        "nav.about":   "Tentang",
+        "nav.cta":     "Deteksi Sekarang",
+
+        "page.badge":  "MobileNetV2 · Akurasi 98%",
+        "page.title":  "Tentang SmartApple",
+        "page.sub":    "Sistem deteksi penyakit buah apel berbasis web menggunakan deep learning",
+
+        "desc.eyebrow": "Deskripsi",
+        "desc.title":   "Tentang Proyek",
+        "desc.body1":   "<strong>SmartApple</strong> adalah aplikasi berbasis web yang membantu petani, konsumen, dan peneliti mengidentifikasi kondisi buah apel hanya dengan mengunggah foto.",
+        "desc.body2":   "Sistem ini mengklasifikasikan apel ke dalam empat kelas: <strong>Normal</strong>, <strong>Blotch</strong>, <strong>Rot</strong>, dan <strong>Scab</strong> — lengkap dengan confidence score, tingkat keparahan, dan rekomendasi penanganan.",
+
+        "stat.accuracy": "Akurasi Model",
+        "stat.classes":  "Kelas Deteksi",
+        "stat.response": "Waktu Respon",
+        "stat.web":      "Berbasis Web",
+
+        "method.eyebrow":     "Model AI",
+        "method.title":       "Metode yang Digunakan",
+        "method.card1.title": "MobileNetV2 — Transfer Learning",
+        "method.card1.text":  "Arsitektur CNN yang ringan dan efisien, dilatih ulang menggunakan transfer learning pada dataset penyakit apel. Dirancang untuk performa tinggi di lingkungan web tanpa membutuhkan hardware khusus.",
+        "method.card2.title": "Deteksi Visual Berbasis Pola",
+        "method.card2.text":  "Model mengekstrak fitur visual seperti warna, tekstur, dan pola bercak dari gambar, lalu mengklasifikasikannya ke salah satu dari 4 kelas penyakit apel secara otomatis.",
+
+        "tech.eyebrow": "Teknologi",
+        "tech.title":   "Stack yang Digunakan",
+        "tech.py":      "Backend & ML",
+        "tech.flask":   "Framework",
+        "tech.tf":      "Deep Learning",
+        "tech.mn":      "CNN",
+        "tech.html":    "Frontend",
+        "tech.db":      "Riwayat",
+
+        "goals.eyebrow": "Tujuan",
+        "goals.title":   "Tujuan Pengembangan",
+        "goals.list": [
+          "Membantu petani mendeteksi penyakit apel sejak dini sebelum menyebar ke seluruh kebun",
+          "Memberikan analisis cepat hanya dengan mengunggah foto dari ponsel",
+          "Meningkatkan kualitas dan nilai jual hasil panen apel",
+          "Menjadi platform eksplorasi AI di bidang patologi tanaman",
+          "Menyediakan solusi AI pertanian yang mudah diakses tanpa keahlian teknis"
+        ],
+
+        "team.eyebrow": "Tim",
+        "team.title":   "Pengembang",
+        "team.role1":   "Machine Learning",
+        "team.role2":   "Backend Developer",
+        "team.role3":   "Frontend Developer",
+        "team.role4":   "Data & Dokumentasi",
+
+        "cta.headline": "Sekarang — Gratis",
+        "cta.sub":      "Upload foto apel dan dapatkan klasifikasi penyakit lengkap dalam hitungan detik. Tanpa registrasi.",
+        "cta.btn":      "Mulai Deteksi Sekarang",
+
+        "title": "SmartApple — Tentang Sistem",
+      },
+
+      en: {
+        "nav.home":    "Home",
+        "nav.detect":  "Detect",
+        "nav.history": "History",
+        "nav.about":   "About",
+        "nav.cta":     "Detect Now",
+
+        "page.badge":  "MobileNetV2 · 98% Accuracy",
+        "page.title":  "About SmartApple",
+        "page.sub":    "A web-based apple disease detection system powered by deep learning",
+
+        "desc.eyebrow": "Description",
+        "desc.title":   "About the Project",
+        "desc.body1":   "<strong>SmartApple</strong> is a web-based application that helps farmers, consumers, and researchers identify apple fruit conditions simply by uploading a photo.",
+        "desc.body2":   "The system classifies apples into four classes: <strong>Normal</strong>, <strong>Blotch</strong>, <strong>Rot</strong>, and <strong>Scab</strong> — complete with a confidence score, severity level, and handling recommendations.",
+
+        "stat.accuracy": "Model Accuracy",
+        "stat.classes":  "Detection Classes",
+        "stat.response": "Response Time",
+        "stat.web":      "Web-Based",
+
+        "method.eyebrow":     "AI Model",
+        "method.title":       "Method Used",
+        "method.card1.title": "MobileNetV2 — Transfer Learning",
+        "method.card1.text":  "A lightweight and efficient CNN architecture, retrained using transfer learning on an apple disease dataset. Designed for high performance in a web environment without requiring specialized hardware.",
+        "method.card2.title": "Pattern-Based Visual Detection",
+        "method.card2.text":  "The model extracts visual features such as color, texture, and spot patterns from images, then automatically classifies them into one of 4 apple disease classes.",
+
+        "tech.eyebrow": "Technology",
+        "tech.title":   "Stack Used",
+        "tech.py":      "Backend & ML",
+        "tech.flask":   "Framework",
+        "tech.tf":      "Deep Learning",
+        "tech.mn":      "CNN",
+        "tech.html":    "Frontend",
+        "tech.db":      "History",
+
+        "goals.eyebrow": "Goals",
+        "goals.title":   "Development Objectives",
+        "goals.list": [
+          "Help farmers detect apple diseases early before they spread across the orchard",
+          "Provide rapid analysis simply by uploading a photo from a phone",
+          "Improve the quality and market value of apple harvests",
+          "Serve as an AI exploration platform in the field of plant pathology",
+          "Provide an easy-to-access agricultural AI solution without technical expertise"
+        ],
+
+        "team.eyebrow": "Team",
+        "team.title":   "Developers",
+        "team.role1":   "Machine Learning",
+        "team.role2":   "Backend Developer",
+        "team.role3":   "Frontend Developer",
+        "team.role4":   "Data & Documentation",
+
+        "cta.headline": "Now — Free",
+        "cta.sub":      "Upload an apple photo and get a complete disease classification in seconds. No registration required.",
+        "cta.btn":      "Start Detection Now",
+
+        "title": "SmartApple — About",
+      }
+    };
+
+    /* =========================================================
+       LANGUAGE ENGINE
+    ========================================================= */
+    let currentLang = localStorage.getItem('sa-lang') || 'id';
+
+    function applyLang(lang) {
+      const t = translations[lang];
+      document.documentElement.lang = lang;
+
+      // Standard text nodes
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key] !== undefined) el.textContent = t[key];
+      });
+
+      // HTML nodes (for content with tags like <strong>)
+      document.querySelectorAll('[data-i18n-html]').forEach(el => {
+        const key = el.getAttribute('data-i18n-html');
+        if (t[key] !== undefined) el.innerHTML = t[key];
+      });
+
+      // Render goal list dynamically
+      const goalList = document.getElementById('goal-list');
+      if (goalList && Array.isArray(t['goals.list'])) {
+        goalList.innerHTML = t['goals.list'].map(item => `
+          <li><i class="mdi mdi-check-circle"></i> ${item}</li>
+        `).join('');
+      }
+
+      // Update lang button labels
+      const nextLang = lang === 'id' ? 'EN' : 'ID';
+      document.querySelectorAll('#lang-label-mobile, #lang-label-desktop').forEach(el => {
+        el.textContent = nextLang;
+      });
+
+      // Update page title
+      document.title = t['title'] || 'SmartApple';
+    }
+
+    function toggleLang() {
+      currentLang = currentLang === 'id' ? 'en' : 'id';
+      localStorage.setItem('sa-lang', currentLang);
+      applyLang(currentLang);
+    }
+
+    // Apply on load
+    applyLang(currentLang);
+
+    /* =========================================================
+       NAVBAR & SCROLL
+    ========================================================= */
+    AOS.init({ duration: 600, once: true, offset: 30 });
+
+    function toggleMenu() {
+      const nl = document.getElementById('nav-links');
+      const ic = document.getElementById('menu-icon');
+      const isOpen = nl.classList.toggle('open');
+      ic.className = isOpen ? 'mdi mdi-close' : 'mdi mdi-menu';
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    }
+
+    document.querySelectorAll('.nav-link, .nav-link-cta').forEach(link => {
+      link.addEventListener('click', () => {
+        document.getElementById('nav-links').classList.remove('open');
+        document.getElementById('menu-icon').className = 'mdi mdi-menu';
+        document.body.style.overflow = '';
+      });
+    });
+
+    document.addEventListener('click', e => {
+      const nl = document.getElementById('nav-links');
+      const toggle = document.querySelector('.nav-toggle');
+      if (nl.classList.contains('open') && !nl.contains(e.target) && !toggle.contains(e.target)) {
+        nl.classList.remove('open');
+        document.getElementById('menu-icon').className = 'mdi mdi-menu';
+        document.body.style.overflow = '';
+      }
+    });
+
+    window.addEventListener('scroll', () => {
+      document.getElementById('nav').style.background =
+        window.scrollY > 40 ? 'rgba(8,14,11,0.97)' : 'rgba(8,14,11,0.88)';
+    }, { passive: true });
+  </script>
+</body>
+</html>

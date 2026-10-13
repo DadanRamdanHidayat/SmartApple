@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>SmartApple — Deteksi Penyakit Apel</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #080e0b; --bg2: #0d1710; --bg3: #111f15;
+      --surface: #172519; --surface2: #1e3220;
+      --border:  rgba(74,222,128,0.1); --border2: rgba(74,222,128,0.22); --border3: rgba(74,222,128,0.35);
+      --green:   #4ade80; --green2: #22c55e; --green3: #16a34a; --green4: #bbf7d0;
+      --accent:  #a3e635; --text: #f0fdf4; --text2: #86efac;
+      --muted:   #52615a; --muted2: #8a9e93;
+      --yellow:  #fbbf24; --yellow2: #fef08a;
+      --red:     #f87171; --red2: #fee2e2;
+      --purple:  #c084fc; --purple2: #f3e8ff;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg); color: var(--text);
+      line-height: 1.6; overflow-x: hidden; max-width: 100vw;
+    }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 99px; }
+
+    /* ══════════════════════ NAVBAR ══════════════════════ */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+      height: 56px; padding: 0 0.875rem;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(8,14,11,0.88);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border); transition: background 0.3s;
+    }
+    .nav-brand {
+      font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1rem;
+      color: var(--green); text-decoration: none;
+      display: flex; align-items: center; gap: 6px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-brand i { font-size: 1.2rem; }
+    .nav-brand .nb { color: var(--text); }
+
+    .nav-right-mobile { display: flex; align-items: center; gap: 0.4rem; }
+
+    .lang-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--surface); border: 1px solid var(--border2);
+      color: var(--text2); font-family: 'Inter', sans-serif;
+      font-size: 0.7rem; font-weight: 700;
+      padding: 0.3rem 0.55rem; border-radius: 8px; cursor: pointer;
+      -webkit-tap-highlight-color: transparent; transition: all 0.2s;
+      letter-spacing: 0.5px; min-height: 36px;
+    }
+    .lang-btn:hover, .lang-btn:active { background: var(--surface2); border-color: var(--green); color: var(--green); }
+    .lang-btn i { font-size: 0.85rem; }
+
+    .nav-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 9px; cursor: pointer; font-size: 1.2rem; color: var(--text);
+      -webkit-tap-highlight-color: transparent; transition: background 0.2s;
+    }
+    .nav-toggle:active { background: var(--surface2); }
+    .nav-links { display: none; list-style: none; }
+    .nav-right  { display: none; }
+    .nav-links.open {
+      display: flex; flex-direction: column;
+      position: fixed; top: 56px; left: 0; right: 0;
+      background: rgba(8,14,11,0.98);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+      gap: 0.15rem; z-index: 499;
+    }
+    .nav-link {
+      text-decoration: none; color: var(--muted2); font-size: 0.9rem;
+      font-weight: 500; padding: 0.65rem 0.85rem; border-radius: 10px;
+      display: flex; align-items: center; gap: 8px;
+      -webkit-tap-highlight-color: transparent; transition: all 0.2s;
+    }
+    .nav-link:active { background: var(--surface); }
+    .nav-link.active { color: var(--green); background: rgba(74,222,128,0.08); }
+    .nav-link-cta {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: var(--green3); color: #fff; font-weight: 700; font-size: 0.9rem;
+      padding: 0.8rem; border-radius: 10px; text-decoration: none; margin-top: 0.4rem;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-link-cta:active { background: var(--green2); }
+    @media (min-width: 768px) {
+      nav { height: 64px; padding: 0 2rem; }
+      .nav-toggle { display: none; }
+      .nav-right-mobile { gap: 0; }
+      .nav-right-mobile .nav-toggle { display: none; }
+      .nav-links {
+        display: flex !important; flex-direction: row;
+        position: static; background: none; border: none; padding: 0;
+        backdrop-filter: none; gap: 0.1rem;
+      }
+      .nav-link { font-size: 0.875rem; padding: 0.45rem 0.9rem; }
+      .nav-link:hover { color: var(--text); background: var(--surface); }
+      .nav-right { display: flex; align-items: center; gap: 0.75rem; }
+      .nav-cta {
+        display: inline-flex; align-items: center; gap: 7px;
+        background: var(--green3); color: #fff; font-size: 0.85rem; font-weight: 600;
+        padding: 0.5rem 1.1rem; border-radius: 8px; text-decoration: none;
+        transition: all 0.2s;
+      }
+      .nav-cta:hover { background: var(--green2); transform: translateY(-1px); }
+      .nav-link-cta { display: none; }
+      .nav-right-mobile { display: none; }
+    }
+
+    /* ══════════════════════ PAGE HEADER ══════════════════════ */
+    .page-header {
+      padding: 5rem 1rem 1.75rem;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .page-header::before {
+      content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 500px; height: 200px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(22,163,74,0.14) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .ph-inner { position: relative; z-index: 2; }
+    .ph-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(74,222,128,0.07); border: 1px solid var(--border2);
+      color: var(--green); font-size: 0.62rem; font-weight: 600;
+      padding: 0.28rem 0.75rem; border-radius: 99px; margin-bottom: 0.85rem;
+      text-transform: uppercase; letter-spacing: 0.7px;
+    }
+    .page-header h1 {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(1.35rem, 5.5vw, 2.5rem);
+      font-weight: 800; letter-spacing: -0.5px; color: var(--text);
+      margin-bottom: 0.5rem;
+      display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
+    }
+    .page-header h1 i { color: var(--green); font-size: clamp(1.3rem, 5vw, 2rem); }
+    .page-header p { color: var(--muted2); font-size: 0.82rem; max-width: 360px; margin: 0 auto; line-height: 1.65; }
+
+    /* ══════════════════════ MAIN LAYOUT ══════════════════════ */
+    .detect-wrap {
+      max-width: 1100px; margin: 0 auto;
+      padding: 1.25rem 0.875rem 4rem;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+
+    .panel {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.1rem;
+      position: relative; overflow: hidden;
+    }
+    .panel-title {
+      font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 700;
+      color: var(--text2); margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 7px;
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .panel-title i { font-size: 0.9rem; color: var(--green); }
+
+    /* ── TABS ── */
+    .input-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .input-tab {
+      flex: 1; padding: 0.55rem 0.4rem;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 10px; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 700;
+      color: var(--muted2); transition: all 0.2s;
+      text-transform: uppercase; letter-spacing: 0.4px;
+      -webkit-tap-highlight-color: transparent; min-height: 44px;
+    }
+    .input-tab:active { border-color: var(--border2); }
+    .input-tab.active { background: rgba(74,222,128,0.1); border-color: var(--border2); color: var(--green); }
+    .input-tab i { font-size: 0.9rem; }
+
+    /* ── UPLOAD ZONE ── */
+    .upload-zone {
+      border: 2px dashed rgba(74,222,128,0.2); border-radius: 12px;
+      padding: 1.75rem 1rem; text-align: center; cursor: pointer;
+      background: rgba(74,222,128,0.02); display: block;
+      transition: all 0.25s; min-height: 130px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .upload-zone:active { border-color: var(--border3); background: rgba(74,222,128,0.05); }
+    .upload-zone.has-file { border-color: var(--green3); background: rgba(74,222,128,0.04); }
+    .upload-zone input { display: none; }
+    .uz-icon { font-size: 2.25rem; color: var(--muted); display: block; margin-bottom: 0.5rem; transition: color 0.25s; }
+    .upload-zone:active .uz-icon, .upload-zone.has-file .uz-icon { color: var(--green); }
+    .uz-text { color: var(--muted2); font-size: 0.82rem; }
+    .uz-text strong { color: var(--green); }
+    .uz-hint { font-size: 0.7rem; color: var(--muted); margin-top: 0.3rem; }
+
+    #preview-wrap { display: none; margin-top: 0.9rem; }
+    .preview-inner { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid var(--border2); }
+    #preview-img { width: 100%; max-height: 200px; object-fit: contain; display: block; background: var(--bg3); }
+    .preview-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(8,14,11,0.85));
+      padding: 0.6rem 0.8rem 0.55rem;
+    }
+    .preview-filename { font-size: 0.72rem; color: var(--text2); display: flex; align-items: center; gap: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .preview-size { font-size: 0.65rem; color: var(--muted2); margin-top: 0.1rem; }
+
+    .btn-detect {
+      width: 100%; margin-top: 0.9rem; padding: 0.875rem;
+      background: var(--green); color: #080e0b;
+      border: none; border-radius: 11px;
+      font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all 0.2s; min-height: 52px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-detect:active:not(:disabled) { background: var(--accent); transform: scale(0.98); }
+    .btn-detect:disabled { background: var(--surface2); color: var(--muted); cursor: not-allowed; }
+    .btn-reset {
+      width: 100%; margin-top: 0.45rem; padding: 0.65rem;
+      background: transparent; color: var(--muted2);
+      border: 1px solid var(--border); border-radius: 11px;
+      font-size: 0.82rem; font-weight: 500; cursor: pointer;
+      display: none; align-items: center; justify-content: center; gap: 7px;
+      transition: all 0.2s; min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-reset:active { background: var(--surface); }
+
+    /* ── TIPS ── */
+    .tips-panel {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1rem;
+    }
+    .tips-header {
+      display: flex; align-items: center; gap: 7px;
+      font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 700;
+      color: var(--yellow); text-transform: uppercase; letter-spacing: 0.7px;
+      margin-bottom: 0.7rem;
+    }
+    .tip-row {
+      display: flex; gap: 8px; align-items: flex-start;
+      font-size: 0.78rem; color: var(--muted2);
+      padding: 0.4rem 0; border-bottom: 1px solid var(--border);
+    }
+    .tip-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .tip-row i { color: var(--green); font-size: 0.88rem; margin-top: 2px; flex-shrink: 0; }
+
+    /* ── CLASS MINI GRID ── */
+    /* FIX: Use auto-fit with minmax so it wraps on very small screens */
+    .class-mini-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem;
+    }
+    /* On very small screens (<340px), stack to single column */
+    @media (max-width: 339px) {
+      .class-mini-grid { grid-template-columns: 1fr; }
+    }
+    .cmi { border-radius: 11px; padding: 0.8rem; }
+    .cmi-normal { background: linear-gradient(145deg,#0c2115,#0f2a1a); border: 1px solid rgba(74,222,128,0.18); }
+    .cmi-blotch { background: linear-gradient(145deg,#1a160a,#221c0c); border: 1px solid rgba(251,191,36,0.18); }
+    .cmi-rot    { background: linear-gradient(145deg,#1c0c0c,#240f0f); border: 1px solid rgba(248,113,113,0.18); }
+    .cmi-scab   { background: linear-gradient(145deg,#170c1e,#1e0f28); border: 1px solid rgba(192,132,252,0.18); }
+    .cmi-head { display: flex; align-items: center; gap: 6px; margin-bottom: 0.25rem; }
+    .cmi-head i { font-size: 1rem; flex-shrink: 0; }
+    .cmi-normal .cmi-head i { color: var(--green); }
+    .cmi-blotch .cmi-head i { color: var(--yellow); }
+    .cmi-rot    .cmi-head i { color: var(--red); }
+    .cmi-scab   .cmi-head i { color: var(--purple); }
+    .cmi-label { font-family: 'Inter', sans-serif; font-size: 0.76rem; font-weight: 700; }
+    .cmi-normal .cmi-label { color: var(--green4); }
+    .cmi-blotch .cmi-label { color: var(--yellow2); }
+    .cmi-rot    .cmi-label { color: var(--red2); }
+    .cmi-scab   .cmi-label { color: var(--purple2); }
+    .cmi p { font-size: 0.68rem; color: var(--muted2); line-height: 1.45; }
+
+    /* ── RESULT ── */
+    #result-card { display: none; }
+
+    .spinner-wrap {
+      display: none; flex-direction: column; align-items: center;
+      justify-content: center; gap: 1rem; padding: 2.5rem 0;
+    }
+    .spin-outer { width: 52px; height: 52px; position: relative; }
+    .spin-ring { width: 52px; height: 52px; border: 3px solid var(--surface2); border-top-color: var(--green); border-radius: 50%; animation: spin 0.9s linear infinite; position: absolute; }
+    .spin-ring2 { width: 38px; height: 38px; border: 3px solid transparent; border-top-color: rgba(74,222,128,0.3); border-radius: 50%; animation: spin 1.4s linear infinite reverse; position: absolute; top: 7px; left: 7px; }
+    .spin-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin-label { color: var(--muted2); font-size: 0.82rem; }
+    .spin-sub { color: var(--muted); font-size: 0.72rem; }
+
+    .status-card {
+      border-radius: 12px; padding: 0.9rem 1.1rem;
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 1.1rem;
+    }
+    .status-card.sc-normal { background: linear-gradient(135deg,rgba(74,222,128,0.1),rgba(22,163,74,0.06)); border: 1px solid rgba(74,222,128,0.25); }
+    .status-card.sc-blotch { background: linear-gradient(135deg,rgba(251,191,36,0.1),rgba(180,130,0,0.06));  border: 1px solid rgba(251,191,36,0.25); }
+    .status-card.sc-rot    { background: linear-gradient(135deg,rgba(248,113,113,0.1),rgba(185,28,28,0.06)); border: 1px solid rgba(248,113,113,0.25); }
+    .status-card.sc-scab   { background: linear-gradient(135deg,rgba(192,132,252,0.1),rgba(124,58,237,0.06));border: 1px solid rgba(192,132,252,0.25); }
+    .sc-icon-wrap { width: 44px; height: 44px; border-radius: 11px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .status-card.sc-normal .sc-icon-wrap { background: rgba(74,222,128,0.12); }
+    .status-card.sc-blotch .sc-icon-wrap { background: rgba(251,191,36,0.12); }
+    .status-card.sc-rot    .sc-icon-wrap { background: rgba(248,113,113,0.12); }
+    .status-card.sc-scab   .sc-icon-wrap { background: rgba(192,132,252,0.12); }
+    .sc-icon-wrap i { font-size: 1.4rem; }
+    .status-card.sc-normal .sc-icon-wrap i { color: var(--green); }
+    .status-card.sc-blotch .sc-icon-wrap i { color: var(--yellow); }
+    .status-card.sc-rot    .sc-icon-wrap i { color: var(--red); }
+    .status-card.sc-scab   .sc-icon-wrap i { color: var(--purple); }
+    .sc-lbl { font-size: 0.62rem; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 0.12rem; }
+    .sc-val { font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 800; letter-spacing: -0.2px; }
+    .status-card.sc-normal .sc-val { color: var(--green4); }
+    .status-card.sc-blotch .sc-val { color: var(--yellow2); }
+    .status-card.sc-rot    .sc-val { color: var(--red2); }
+    .status-card.sc-scab   .sc-val { color: var(--purple2); }
+
+    .conf-block { margin-bottom: 1.1rem; }
+    .conf-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem; }
+    .conf-title { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; font-weight: 600; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.5px; }
+    .conf-title i { color: var(--green); }
+    .conf-pct { font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 800; }
+    .conf-track { height: 6px; background: var(--surface2); border-radius: 99px; overflow: hidden; margin-bottom: 0.3rem; }
+    .conf-fill { height: 100%; border-radius: 99px; transition: width 1s cubic-bezier(0.4,0,0.2,1); width: 0%; }
+    .cf-normal { background: linear-gradient(90deg, var(--green3), var(--green)); }
+    .cf-blotch { background: linear-gradient(90deg, #b45309, var(--yellow)); }
+    .cf-rot    { background: linear-gradient(90deg, #b91c1c, var(--red)); }
+    .cf-scab   { background: linear-gradient(90deg, #7c3aed, var(--purple)); }
+    /* FIX: Bigger font for conf-levels, won't squish on small screens */
+    .conf-levels { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--muted); }
+
+    /* FIX: info-grid responsive — stack on narrow screens */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.6rem; margin-bottom: 1rem;
+    }
+    @media (max-width: 339px) {
+      .info-grid { grid-template-columns: 1fr; }
+    }
+    .info-tile { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 0.8rem; }
+    .it-label { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.28rem; display: flex; align-items: center; gap: 4px; }
+    .it-label i { font-size: 0.78rem; color: var(--green3); }
+    /* FIX: clamp font so it never overflows tile */
+    .it-val { font-family: 'Inter', sans-serif; font-size: clamp(0.72rem, 2.5vw, 0.84rem); font-weight: 700; color: var(--text); word-break: break-word; }
+
+    .solusi-box {
+      background: var(--bg3); border: 1px solid var(--border2);
+      border-radius: 13px; padding: 1rem 1.1rem;
+      display: none; margin-top: 0.6rem;
+    }
+    .solusi-header {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 700;
+      color: var(--green); text-transform: uppercase; letter-spacing: 0.6px;
+      margin-bottom: 0.9rem; padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .solusi-header i { font-size: 0.95rem; }
+    .solusi-category { margin-bottom: 0.85rem; }
+    .solusi-category:last-child { margin-bottom: 0; }
+    .solusi-cat-label {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-family: 'Inter', sans-serif; font-size: 0.66rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      margin-bottom: 0.4rem; padding: 0.22rem 0.55rem;
+      border-radius: 6px;
+      /* FIX: limit width so it wraps properly */
+      max-width: 100%; width: fit-content;
+    }
+    .solusi-cat-label.mekanis    { color: var(--yellow);  background: rgba(251,191,36,0.08);  border: 1px solid rgba(251,191,36,0.18);  }
+    .solusi-cat-label.kimiawi    { color: var(--red);     background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.18); }
+    .solusi-cat-label.kultur     { color: var(--green);   background: rgba(74,222,128,0.08);  border: 1px solid rgba(74,222,128,0.18);  }
+    .solusi-cat-label.pascapanen { color: var(--purple);  background: rgba(192,132,252,0.08); border: 1px solid rgba(192,132,252,0.18); }
+    .solusi-cat-label i { font-size: 0.78rem; }
+    .solusi-item {
+      display: flex; gap: 7px; align-items: flex-start;
+      font-size: 0.78rem; color: var(--muted2); line-height: 1.55;
+      padding: 0.28rem 0;
+    }
+    .solusi-item i { font-size: 0.72rem; margin-top: 4px; flex-shrink: 0; color: var(--muted); }
+    .solusi-item:not(:last-child) { border-bottom: 1px solid rgba(74,222,128,0.05); }
+
+    .ai-rec-box {
+      background: linear-gradient(135deg, rgba(163,230,53,0.05), rgba(74,222,128,0.03));
+      border: 1px solid rgba(163,230,53,0.2);
+      border-radius: 13px; padding: 1rem 1.1rem;
+      display: none; margin-top: 0.6rem;
+    }
+    .ai-rec-header {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 700;
+      color: var(--accent); text-transform: uppercase; letter-spacing: 0.6px;
+      margin-bottom: 0.7rem; padding-bottom: 0.6rem;
+      border-bottom: 1px solid rgba(163,230,53,0.12);
+    }
+    .ai-rec-header i { font-size: 0.95rem; }
+    .ai-rec-text { font-size: 0.8rem; color: var(--muted2); line-height: 1.75; margin: 0; }
+
+    /* FIX: detail rows — remove fixed min-width, use flex properly */
+    .detail-rows { border-top: 1px solid var(--border); margin-top: 0.8rem; padding-top: 0.8rem; }
+    .d-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 0.45rem 0; border-bottom: 1px solid rgba(74,222,128,0.06);
+      gap: 0.5rem; font-size: 0.78rem;
+    }
+    .d-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .d-key {
+      color: var(--muted2); display: flex; align-items: center; gap: 5px;
+      flex-shrink: 0;
+      /* FIX: was 100px, now auto to prevent overflow on tiny screens */
+      min-width: 80px;
+    }
+    .d-key i { font-size: 0.82rem; color: var(--muted); }
+    .d-val { color: var(--text); font-weight: 500; text-align: right; font-size: 0.76rem; word-break: break-all; }
+
+    .placeholder-panel {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 16px;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; text-align: center;
+      padding: 2.5rem 1.25rem; min-height: 220px; position: relative; overflow: hidden;
+    }
+    .placeholder-panel::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 160px; height: 160px; background: radial-gradient(ellipse, rgba(74,222,128,0.05) 0%, transparent 70%); }
+    .ph-big-icon { font-size: 3rem; color: var(--surface2); display: block; margin-bottom: 0.85rem; animation: phpulse 3s ease-in-out infinite; }
+    @keyframes phpulse { 0%,100%{opacity:0.5;transform:scale(1)} 50%{opacity:0.8;transform:scale(1.04)} }
+    .placeholder-panel h3 { font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 700; color: var(--muted2); margin-bottom: 0.35rem; }
+    .placeholder-panel p { font-size: 0.75rem; color: var(--muted); max-width: 210px; line-height: 1.55; }
+
+    .acc-note { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 0.9rem 1rem; display: flex; gap: 8px; align-items: flex-start; }
+    .acc-note i { color: var(--green3); font-size: 0.95rem; margin-top: 2px; flex-shrink: 0; }
+    .acc-note-title { font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 700; color: var(--text2); margin-bottom: 0.12rem; }
+    .acc-note p { font-size: 0.7rem; color: var(--muted2); line-height: 1.5; }
+
+    /* ── CAMERA MODAL ── */
+    .cam-modal {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(8,14,11,0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      align-items: flex-end; justify-content: center; padding: 0;
+    }
+    .cam-modal.open { display: flex; }
+    .cam-box {
+      background: var(--bg2); border: 1px solid var(--border2);
+      /* FIX: flat bottom on mobile (bottom sheet style) */
+      border-radius: 20px 20px 0 0;
+      width: 100%; max-width: 520px;
+      overflow: hidden; animation: slideup 0.3s ease;
+    }
+    @keyframes slideup { from{transform:translateY(100%)} to{transform:translateY(0)} }
+    @media (min-width: 540px) {
+      .cam-modal { align-items: center; padding: 1.5rem; }
+      .cam-box { border-radius: 22px; }
+    }
+    .cam-header { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.1rem; border-bottom: 1px solid var(--border); }
+    .cam-title { font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .cam-title i { color: var(--green); }
+    .cam-close { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--muted2); font-size: 1rem; -webkit-tap-highlight-color: transparent; }
+    .cam-close:active { background: var(--surface2); }
+    .cam-viewport { position: relative; background: #000; }
+    #cam-video { width: 100%; display: block; max-height: 52vw; object-fit: cover; }
+    @media (min-width: 540px) { #cam-video { max-height: 280px; } }
+    .cam-overlay { position: absolute; inset: 0; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+    .cam-frame { width: 160px; height: 160px; border-radius: 50%; border: 2px solid rgba(74,222,128,0.5); box-shadow: 0 0 0 9999px rgba(8,14,11,0.4); position: relative; }
+    .cam-frame::before, .cam-frame::after { content: ''; position: absolute; width: 18px; height: 18px; border-color: var(--green); border-style: solid; }
+    .cam-frame::before { top: -2px; left: -2px; border-width: 3px 0 0 3px; border-radius: 3px 0 0 0; }
+    .cam-frame::after  { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; border-radius: 0 0 3px 0; }
+    .cam-scan-line { position: absolute; left: 10%; right: 10%; height: 2px; background: linear-gradient(90deg, transparent, var(--green), transparent); animation: scanline 2s ease-in-out infinite; border-radius: 99px; }
+    @keyframes scanline { 0%{top:15%;opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{top:85%;opacity:0} }
+    .cam-hint { position: absolute; bottom: 0.55rem; left: 50%; transform: translateX(-50%); background: rgba(8,14,11,0.8); border: 1px solid var(--border); color: var(--muted2); font-size: 0.68rem; padding: 0.22rem 0.65rem; border-radius: 99px; white-space: nowrap; }
+    .cam-footer {
+      padding: 0.9rem 1.1rem;
+      /* FIX: safe area for home indicator on iOS */
+      padding-bottom: calc(0.9rem + env(safe-area-inset-bottom));
+      display: flex; align-items: center; gap: 0.65rem;
+    }
+    .cam-switch { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.6rem 0.85rem; display: flex; align-items: center; gap: 5px; color: var(--muted2); font-size: 0.8rem; font-weight: 500; cursor: pointer; white-space: nowrap; min-height: 48px; -webkit-tap-highlight-color: transparent; }
+    .cam-switch:active { border-color: var(--border2); color: var(--text); }
+    .cam-capture { flex: 1; padding: 0.8rem; background: var(--green); color: #080e0b; border: none; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; min-height: 48px; -webkit-tap-highlight-color: transparent; transition: all 0.2s; }
+    .cam-capture:active { background: var(--accent); transform: scale(0.98); }
+    .cam-status { padding: 0.45rem 1.1rem; text-align: center; font-size: 0.72rem; color: var(--muted2); border-top: 1px solid var(--border); }
+    .cam-status.error { color: var(--red); }
+    .cam-status.ok { color: var(--green); }
+    #cam-canvas { display: none; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--bg); border-top: 1px solid var(--border);
+      padding: 1.25rem 1rem;
+      padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
+    }
+    .foot-inner { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 0.85rem; text-align: center; }
+    .foot-brand { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 0.9rem; color: var(--green); text-decoration: none; display: flex; align-items: center; gap: 7px; }
+    .foot-links { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .foot-links a { color: var(--muted); font-size: 0.78rem; text-decoration: none; }
+    .foot-links a:active { color: var(--green); }
+    .foot-copy { color: var(--muted); font-size: 0.7rem; }
+
+    /* ══════════════════════ TABLET+ ══════════════════════ */
+    @media (min-width: 768px) {
+      .page-header { padding: 7.5rem 2rem 3rem; }
+      .page-header p { font-size: 0.95rem; }
+      .detect-wrap { padding: 2rem 2rem 5rem; flex-direction: row; align-items: flex-start; gap: 1.75rem; }
+      .detect-left, .detect-right { flex: 1; display: flex; flex-direction: column; gap: 1.25rem; }
+      .panel { padding: 1.75rem; border-radius: 20px; }
+      .panel-title { font-size: 0.88rem; margin-bottom: 1.5rem; }
+      .upload-zone { padding: 2.75rem 1.5rem; }
+      .uz-icon { font-size: 3.2rem; }
+      .uz-text { font-size: 0.88rem; }
+      #preview-img { max-height: 250px; }
+      .tips-panel { padding: 1.5rem; }
+      .status-card { padding: 1.25rem 1.5rem; }
+      .sc-icon-wrap { width: 54px; height: 54px; }
+      .sc-icon-wrap i { font-size: 1.75rem; }
+      .sc-val { font-size: 1.25rem; }
+      .info-grid { gap: 0.85rem; }
+      .info-tile { padding: 1rem; }
+      .it-label { font-size: 0.7rem; }
+      .it-val { font-size: 0.92rem; }
+      .solusi-box { padding: 1.4rem 1.5rem; }
+      .solusi-item { font-size: 0.84rem; }
+      .ai-rec-box { padding: 1.4rem 1.5rem; }
+      .ai-rec-text { font-size: 0.86rem; }
+      .d-row { font-size: 0.84rem; }
+      .d-key { min-width: 100px; }
+      .placeholder-panel { min-height: 320px; padding: 4rem 2rem; }
+      .ph-big-icon { font-size: 4.5rem; }
+      .foot-inner { flex-direction: row; justify-content: space-between; text-align: left; }
+      .btn-detect:hover:not(:disabled) { background: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(74,222,128,0.25); }
+      .btn-reset:hover { background: var(--surface); color: var(--text); border-color: var(--border2); }
+      .input-tab:hover { border-color: var(--border2); color: var(--text); }
+      .cam-switch:hover { border-color: var(--border2); color: var(--text); }
+      .cam-capture:hover { background: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 22px rgba(74,222,128,0.25); }
+      .class-mini-grid { gap: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="nav">
+  <a class="nav-brand" href="/"><i class="mdi mdi-food-apple"></i>Smart<span class="nb">Apple</span></a>
+
+  <div class="nav-right-mobile">
+    <button class="lang-btn" onclick="toggleLang()" id="lang-btn-mobile" aria-label="Toggle language">
+      <i class="mdi mdi-translate"></i> <span id="lang-label-mobile">EN</span>
+    </button>
+    <button class="nav-toggle" onclick="toggleMenu()" aria-label="Menu">
+      <i class="mdi mdi-menu" id="menu-icon"></i>
+    </button>
+  </div>
+
+  <ul class="nav-links" id="nav-links">
+    <li><a href="/" class="nav-link"><i class="mdi mdi-home-outline"></i> <span data-i18n="nav.home">Beranda</span></a></li>
+    <li><a href="/deteksi" class="nav-link active"><i class="mdi mdi-magnify-scan"></i> <span data-i18n="nav.detect">Deteksi</span></a></li>
+    <li><a href="/riwayat" class="nav-link"><i class="mdi mdi-history"></i> <span data-i18n="nav.history">Riwayat</span></a></li>
+    <li><a href="/tentang" class="nav-link"><i class="mdi mdi-information-outline"></i> <span data-i18n="nav.about">Tentang</span></a></li>
+    <a href="/riwayat" class="nav-link-cta"><i class="mdi mdi-history"></i> <span data-i18n="nav.historyCta">Riwayat Deteksi</span></a>
+  </ul>
+
+  <div class="nav-right">
+    <button class="lang-btn" onclick="toggleLang()" id="lang-btn-desktop" aria-label="Toggle language">
+      <i class="mdi mdi-translate"></i> <span id="lang-label-desktop">EN</span>
+    </button>
+    <a href="/riwayat" class="nav-cta"><i class="mdi mdi-history"></i> <span data-i18n="nav.historyCta">Riwayat Deteksi</span></a>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header" data-aos="fade-down" data-aos-duration="600">
+  <div class="ph-inner">
+    <div class="ph-badge"><i class="mdi mdi-shimmer"></i> <span data-i18n="header.badge">MobileNetV2 — 4 Kelas · Akurasi 98%</span></div>
+    <h1><i class="mdi mdi-magnify-scan"></i> <span data-i18n="header.title">Deteksi Penyakit Apel</span></h1>
+    <p data-i18n="header.sub">Upload foto apel, dapatkan klasifikasi Normal, Blotch, Rot, atau Scab dalam hitungan detik.</p>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<div class="detect-wrap">
+
+  <!-- KIRI -->
+  <div class="detect-left">
+
+    <!-- Upload Panel -->
+    <div class="panel" data-aos="fade-right" data-aos-delay="80">
+      <div class="panel-title"><i class="mdi mdi-image-plus-outline"></i> <span data-i18n="panel.input">Input Gambar Apel</span></div>
+
+      <div class="input-tabs">
+        <div class="input-tab active" id="tab-upload" onclick="switchTab('upload')">
+          <i class="mdi mdi-upload-outline"></i> <span data-i18n="tab.upload">Upload</span>
+        </div>
+        <div class="input-tab" id="tab-camera" onclick="switchTab('camera')">
+          <i class="mdi mdi-camera-outline"></i> <span data-i18n="tab.camera">Kamera</span>
+        </div>
+      </div>
+
+      <div id="section-upload">
+        <label class="upload-zone" for="file-input" id="upload-zone">
+          <i class="mdi mdi-cloud-upload-outline uz-icon" id="upload-icon"></i>
+          <div class="uz-text"><strong data-i18n="upload.cta">Tap untuk upload</strong> <span data-i18n="upload.or">atau drag &amp; drop</span></div>
+          <div class="uz-hint"><i class="mdi mdi-file-image-outline"></i> <span data-i18n="upload.hint">JPG, PNG, WEBP — maks. 5 MB</span></div>
+          <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" onchange="onFileSelected(event)" />
+        </label>
+      </div>
+
+      <div id="section-camera" style="display:none;">
+        <div style="border:2px dashed rgba(74,222,128,0.2);border-radius:12px;padding:1.75rem 1rem;text-align:center;background:rgba(74,222,128,0.02);min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.7rem;">
+          <i class="mdi mdi-camera-plus-outline" style="font-size:2.25rem;color:var(--green2);display:block;"></i>
+          <div style="font-size:0.82rem;color:var(--muted2);" data-i18n="cam.prompt">Gunakan kamera untuk foto langsung</div>
+          <button onclick="openCamera()" style="background:var(--green);color:#080e0b;border:none;border-radius:10px;padding:0.65rem 1.35rem;font-family:'Inter',sans-serif;font-size:0.86rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;min-height:46px;-webkit-tap-highlight-color:transparent;">
+            <i class="mdi mdi-camera"></i> <span data-i18n="cam.open">Buka Kamera</span>
+          </button>
+          <div style="font-size:0.68rem;color:var(--muted);"><i class="mdi mdi-information-outline"></i> <span data-i18n="cam.permission">Izin kamera diperlukan</span></div>
+        </div>
+      </div>
+
+      <div id="preview-wrap">
+        <div class="preview-inner">
+          <img id="preview-img" alt="Preview" />
+          <div class="preview-overlay">
+            <div class="preview-filename"><i class="mdi mdi-file-image-outline"></i> <span id="prev-name">—</span></div>
+            <div class="preview-size" id="prev-size"></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-detect" id="btn-detect" onclick="runDetection()" disabled>
+        <i class="mdi mdi-magnify-scan"></i>
+        <span id="btn-label" data-i18n="btn.selectFirst">Pilih Gambar Dulu</span>
+      </button>
+      <button class="btn-reset" id="btn-reset" onclick="resetAll()">
+        <i class="mdi mdi-refresh"></i> <span data-i18n="btn.newPhoto">Foto Baru</span>
+      </button>
+    </div>
+
+    <!-- Tips -->
+    <div class="tips-panel" data-aos="fade-up" data-aos-delay="160">
+      <div class="tips-header"><i class="mdi mdi-lightbulb-outline"></i> <span data-i18n="tips.title">Tips Foto Terbaik</span></div>
+      <div class="tip-row"><i class="mdi mdi-ruler"></i><span data-i18n="tips.t1">Foto dari jarak 20–30 cm agar detail terlihat jelas</span></div>
+      <div class="tip-row"><i class="mdi mdi-white-balance-sunny"></i><span data-i18n="tips.t2">Pencahayaan alami, hindari backlight langsung</span></div>
+      <div class="tip-row"><i class="mdi mdi-focus-field"></i><span data-i18n="tips.t3">Fokus pada permukaan apel, bukan latar belakang</span></div>
+      <div class="tip-row"><i class="mdi mdi-food-apple-outline"></i><span data-i18n="tips.t4">Satu apel per foto untuk hasil lebih akurat</span></div>
+      <div class="tip-row"><i class="mdi mdi-rotate-360"></i><span data-i18n="tips.t5">Ambil dari sisi paling menampakkan kondisi buah</span></div>
+    </div>
+
+    <!-- Class info -->
+    <div class="class-mini-grid" data-aos="fade-up" data-aos-delay="220">
+      <div class="cmi cmi-normal">
+        <div class="cmi-head"><i class="mdi mdi-check-decagram"></i><span class="cmi-label" data-i18n="pill.normal">Normal</span></div>
+        <p data-i18n="cmi.normal">Sehat, tanpa penyakit. Siap konsumsi.</p>
+      </div>
+      <div class="cmi cmi-blotch">
+        <div class="cmi-head"><i class="mdi mdi-bacteria-outline"></i><span class="cmi-label" data-i18n="pill.blotch">Blotch</span></div>
+        <p data-i18n="cmi.blotch">Bercak hitam jamur. Perlu penanganan.</p>
+      </div>
+      <div class="cmi cmi-rot">
+        <div class="cmi-head"><i class="mdi mdi-skull-outline"></i><span class="cmi-label" data-i18n="pill.rot">Busuk</span></div>
+        <p data-i18n="cmi.rot">Busuk parah. Tidak layak konsumsi.</p>
+      </div>
+      <div class="cmi cmi-scab">
+        <div class="cmi-head"><i class="mdi mdi-virus-outline"></i><span class="cmi-label" data-i18n="pill.scab">Kudis</span></div>
+        <p data-i18n="cmi.scab">Tekstur kasar, infeksi Venturia.</p>
+      </div>
+    </div>
+
+  </div><!-- end detect-left -->
+
+  <!-- KANAN -->
+  <div class="detect-right">
+
+    <!-- Placeholder -->
+    <div class="placeholder-panel" id="placeholder-card" data-aos="fade-left" data-aos-delay="120">
+      <i class="mdi mdi-image-search-outline ph-big-icon"></i>
+      <h3 data-i18n="placeholder.title">Menunggu Gambar</h3>
+      <p data-i18n-html="placeholder.sub">Upload foto apel lalu tekan <strong style="color:var(--green);">Deteksi</strong> untuk analisis AI.</p>
+    </div>
+
+    <!-- Result Card -->
+    <div class="panel" id="result-card">
+      <div class="panel-title"><i class="mdi mdi-chart-line-variant"></i> <span data-i18n="result.title">Hasil Analisis Penyakit</span></div>
+
+      <!-- Spinner -->
+      <div class="spinner-wrap" id="spinner">
+        <div class="spin-outer">
+          <div class="spin-ring"></div>
+          <div class="spin-ring2"></div>
+          <div class="spin-dot"></div>
+        </div>
+        <div>
+          <div class="spin-label" data-i18n="spinner.label">Menganalisis gambar...</div>
+          <div class="spin-sub" data-i18n="spinner.sub">MobileNetV2 sedang bekerja</div>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="status-card" id="status-card" style="display:none;"></div>
+
+      <!-- Confidence -->
+      <div class="conf-block" id="conf-block" style="display:none;">
+        <div class="conf-header">
+          <div class="conf-title"><i class="mdi mdi-speedometer"></i> <span data-i18n="conf.title">Confidence Score</span></div>
+          <div class="conf-pct" id="conf-pct">—</div>
+        </div>
+        <div class="conf-track"><div class="conf-fill" id="conf-fill"></div></div>
+        <div class="conf-levels">
+          <span>0%</span>
+          <span data-i18n="conf.low">Rendah</span>
+          <span data-i18n="conf.mid">Sedang</span>
+          <span data-i18n="conf.high">Tinggi</span>
+          <span>100%</span>
+        </div>
+      </div>
+
+      <!-- Info grid -->
+      <div class="info-grid" id="info-grid" style="display:none;">
+        <div class="info-tile">
+          <div class="it-label"><i class="mdi mdi-alert-circle-outline"></i> <span data-i18n="info.kondisi">Kondisi</span></div>
+          <div class="it-val" id="val-kondisi">—</div>
+        </div>
+        <div class="info-tile">
+          <div class="it-label"><i class="mdi mdi-calendar-check-outline"></i> <span data-i18n="info.estimasi">Est. Panen</span></div>
+          <div class="it-val" id="val-estimasi">—</div>
+        </div>
+        <div class="info-tile">
+          <div class="it-label"><i class="mdi mdi-shield-alert-outline"></i> <span data-i18n="info.risiko">Risiko</span></div>
+          <div class="it-val" id="val-risiko">—</div>
+        </div>
+        <div class="info-tile">
+          <div class="it-label"><i class="mdi mdi-shopping-outline"></i> <span data-i18n="info.kelayakan">Kelayakan</span></div>
+          <div class="it-val" id="val-layak">—</div>
+        </div>
+      </div>
+
+      <!-- AI Recommendation -->
+      <div class="ai-rec-box" id="ai-rec-box">
+        <div class="ai-rec-header">
+          <i class="mdi mdi-robot-outline"></i>
+          <span data-i18n="airec.title">Analisis AI — Konsultan Pertanian</span>
+        </div>
+        <p class="ai-rec-text" id="ai-rec-content"></p>
+      </div>
+
+      <!-- Rekomendasi Penanganan -->
+      <div class="solusi-box" id="solusi-box">
+        <div class="solusi-header">
+          <i class="mdi mdi-clipboard-list-outline"></i>
+          <span data-i18n="solusi.title">Rekomendasi Penanganan</span>
+        </div>
+        <div id="solusi-content"></div>
+      </div>
+
+      <!-- Detail rows -->
+      <div class="detail-rows" id="detail-rows" style="display:none;">
+        <div class="d-row">
+          <span class="d-key"><i class="mdi mdi-tag-outline"></i> <span data-i18n="detail.kelas">Kelas</span></span>
+          <span class="d-val" id="val-kelas">—</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key"><i class="mdi mdi-percent-outline"></i> <span data-i18n="detail.akurasi">Akurasi</span></span>
+          <span class="d-val" id="val-akurasi">—</span>
+        </div>
+        <div class="d-row">
+          <span class="d-key"><i class="mdi mdi-clock-outline"></i> <span data-i18n="detail.waktu">Waktu</span></span>
+          <span class="d-val" id="val-waktu">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accuracy note -->
+    <div class="acc-note" data-aos="fade-up" data-aos-delay="200">
+      <i class="mdi mdi-information-outline"></i>
+      <div>
+        <div class="acc-note-title" data-i18n="accnote.title">Tentang Akurasi Model</div>
+        <p data-i18n-html="accnote.body">MobileNetV2 dilatih dengan dataset 4 kelas penyakit apel dan mencapai akurasi <strong style="color:var(--green);">98%</strong>. Hasil terbaik dari foto dengan pencahayaan baik dan fokus jelas.</p>
+      </div>
+    </div>
+
+  </div><!-- end detect-right -->
+</div><!-- end detect-wrap -->
+
+<!-- CAMERA MODAL -->
+<div class="cam-modal" id="cam-modal">
+  <div class="cam-box">
+    <div class="cam-header">
+      <div class="cam-title"><i class="mdi mdi-camera"></i> <span data-i18n="cammodal.title">Foto Langsung</span></div>
+      <div class="cam-close" onclick="closeCamera()"><i class="mdi mdi-close"></i></div>
+    </div>
+    <div class="cam-viewport">
+      <video id="cam-video" autoplay playsinline muted></video>
+      <canvas id="cam-canvas"></canvas>
+      <div class="cam-overlay"><div class="cam-frame"><div class="cam-scan-line"></div></div></div>
+      <div class="cam-hint"><i class="mdi mdi-crosshairs"></i> <span data-i18n="cammodal.hint">Arahkan apel ke dalam lingkaran</span></div>
+    </div>
+    <div class="cam-status" id="cam-status" data-i18n="cammodal.init">Menginisialisasi kamera...</div>
+    <div class="cam-footer">
+      <div class="cam-switch" onclick="switchCamera()"><i class="mdi mdi-camera-flip-outline"></i> <span data-i18n="cammodal.flip">Balik</span></div>
+      <button class="cam-capture" onclick="capturePhoto()" id="btn-capture" disabled>
+        <i class="mdi mdi-camera-iris"></i> <span data-i18n="cammodal.capture">Ambil Foto</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-inner">
+    <a href="/" class="foot-brand"><i class="mdi mdi-food-apple"></i> SmartApple</a>
+    <div class="foot-links">
+      <a href="/" data-i18n="nav.home">Beranda</a>
+      <a href="/deteksi" data-i18n="nav.detect">Deteksi</a>
+      <a href="/riwayat" data-i18n="nav.history">Riwayat</a>
+      <a href="/tentang" data-i18n="nav.about">Tentang</a>
+    </div>
+    <div class="foot-copy">&copy; 2026 SmartApple — Powered by DRAM</div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script>
+  AOS.init({ duration: 600, once: true, offset: 30 });
+
+  const translations = {
+    id: {
+      "nav.home": "Beranda", "nav.detect": "Deteksi",
+      "nav.history": "Riwayat", "nav.about": "Tentang",
+      "nav.historyCta": "Riwayat Deteksi",
+      "header.badge": "MobileNetV2 — 4 Kelas · Akurasi 98%",
+      "header.title": "Deteksi Penyakit Apel",
+      "header.sub": "Upload foto apel, dapatkan klasifikasi Normal, Blotch, Rot, atau Scab dalam hitungan detik.",
+      "panel.input": "Input Gambar Apel",
+      "tab.upload": "Upload", "tab.camera": "Kamera",
+      "upload.cta": "Tap untuk upload", "upload.or": "atau drag & drop",
+      "upload.hint": "JPG, PNG, WEBP — maks. 5 MB",
+      "cam.prompt": "Gunakan kamera untuk foto langsung",
+      "cam.open": "Buka Kamera", "cam.permission": "Izin kamera diperlukan",
+      "btn.selectFirst": "Pilih Gambar Dulu",
+      "btn.analyze": "Analisis Sekarang",
+      "btn.analyzing": "Menganalisis...",
+      "btn.redetect": "Deteksi Ulang",
+      "btn.retry": "Coba Lagi",
+      "btn.newPhoto": "Foto Baru",
+      "tips.title": "Tips Foto Terbaik",
+      "tips.t1": "Foto dari jarak 20–30 cm agar detail terlihat jelas",
+      "tips.t2": "Pencahayaan alami, hindari backlight langsung",
+      "tips.t3": "Fokus pada permukaan apel, bukan latar belakang",
+      "tips.t4": "Satu apel per foto untuk hasil lebih akurat",
+      "tips.t5": "Ambil dari sisi paling menampakkan kondisi buah",
+      "pill.normal": "Normal", "pill.blotch": "Blotch",
+      "pill.rot": "Busuk", "pill.scab": "Kudis",
+      "cmi.normal": "Sehat, tanpa penyakit. Siap konsumsi.",
+      "cmi.blotch": "Bercak hitam jamur. Perlu penanganan.",
+      "cmi.rot":    "Busuk parah. Tidak layak konsumsi.",
+      "cmi.scab":   "Tekstur kasar, infeksi Venturia.",
+      "placeholder.title": "Menunggu Gambar",
+      "placeholder.sub": "Upload foto apel lalu tekan <strong style=\"color:var(--green);\">Deteksi</strong> untuk analisis AI.",
+      "result.title": "Hasil Analisis Penyakit",
+      "spinner.label": "Menganalisis gambar...", "spinner.sub": "MobileNetV2 sedang bekerja",
+      "conf.title": "Confidence Score",
+      "conf.low": "Rendah", "conf.mid": "Sedang", "conf.high": "Tinggi",
+      "info.kondisi": "Kondisi", "info.estimasi": "Est. Panen",
+      "info.risiko": "Risiko", "info.kelayakan": "Kelayakan",
+      "solusi.title": "Rekomendasi Penanganan",
+      "airec.title": "Analisis AI — Konsultan Pertanian",
+      "detail.kelas": "Kelas", "detail.akurasi": "Akurasi", "detail.waktu": "Waktu",
+      "accnote.title": "Tentang Akurasi Model",
+      "accnote.body": "MobileNetV2 dilatih dengan dataset 4 kelas penyakit apel dan mencapai akurasi <strong style=\"color:var(--green);\">98%</strong>. Hasil terbaik dari foto dengan pencahayaan baik dan fokus jelas.",
+      "cammodal.title": "Foto Langsung",
+      "cammodal.hint": "Arahkan apel ke dalam lingkaran",
+      "cammodal.init": "Menginisialisasi kamera...",
+      "cammodal.flip": "Balik", "cammodal.capture": "Ambil Foto",
+      "cammodal.ready": "Kamera siap — arahkan apel ke lingkaran",
+      "cammodal.denied": "Izin kamera ditolak.",
+      "cammodal.unavail": "Kamera tidak tersedia.",
+      "sc.detected": "Kelas Penyakit Terdeteksi",
+      "err.failedConnect": "Gagal Terhubung",
+      "err.serverNote": "Pastikan server Flask berjalan dan endpoint /predict aktif. Detail: ",
+      "meta.normal.kondisi": "Sehat, tanpa penyakit",
+      "meta.normal.risiko":  "Rendah",
+      "meta.normal.layak":   "Layak konsumsi",
+      "meta.normal.kelas":   "Apel Normal",
+      "meta.blotch.kondisi": "Terinfeksi jamur Blotch",
+      "meta.blotch.risiko":  "Sedang",
+      "meta.blotch.layak":   "Sebagian layak",
+      "meta.blotch.kelas":   "Apel Berjamur",
+      "meta.rot.kondisi":    "Pembusukan lanjut",
+      "meta.rot.risiko":     "Tinggi",
+      "meta.rot.layak":      "Tidak layak konsumsi",
+      "meta.rot.kelas":      "Apel Busuk",
+      "meta.scab.kondisi":   "Infeksi jamur Scab",
+      "meta.scab.risiko":    "Sedang–Tinggi",
+      "meta.scab.layak":     "Perlu evaluasi",
+      "meta.scab.kelas":     "Apel Kudis",
+      "cat.mekanis":       "Mekanis",
+      "cat.kimiawi":       "Kimiawi",
+      "cat.kultur_teknis": "Kultur Teknis",
+      "cat.pascapanen":    "Pascapanen",
+    },
+    en: {
+      "nav.home": "Home", "nav.detect": "Detect",
+      "nav.history": "History", "nav.about": "About",
+      "nav.historyCta": "Detection History",
+      "header.badge": "MobileNetV2 — 4 Classes · 98% Accuracy",
+      "header.title": "Apple Disease Detection",
+      "header.sub": "Upload an apple photo, get a Normal, Blotch, Rot, or Scab classification in seconds.",
+      "panel.input": "Apple Image Input",
+      "tab.upload": "Upload", "tab.camera": "Camera",
+      "upload.cta": "Tap to upload", "upload.or": "or drag & drop",
+      "upload.hint": "JPG, PNG, WEBP — max 5 MB",
+      "cam.prompt": "Use the camera to take a live photo",
+      "cam.open": "Open Camera", "cam.permission": "Camera permission required",
+      "btn.selectFirst": "Select an Image First",
+      "btn.analyze": "Analyze Now",
+      "btn.analyzing": "Analyzing...",
+      "btn.redetect": "Re-detect",
+      "btn.retry": "Try Again",
+      "btn.newPhoto": "New Photo",
+      "tips.title": "Best Photo Tips",
+      "tips.t1": "Photograph from 20–30 cm away for clear detail",
+      "tips.t2": "Use natural lighting, avoid direct backlight",
+      "tips.t3": "Focus on the apple surface, not the background",
+      "tips.t4": "One apple per photo for more accurate results",
+      "tips.t5": "Shoot from the angle that best shows the condition",
+      "pill.normal": "Normal", "pill.blotch": "Blotch",
+      "pill.rot": "Rot", "pill.scab": "Scab",
+      "cmi.normal": "Healthy, disease-free. Ready to eat.",
+      "cmi.blotch": "Fungal black spots. Needs treatment.",
+      "cmi.rot":    "Severe rot. Not safe for consumption.",
+      "cmi.scab":   "Rough texture, Venturia infection.",
+      "placeholder.title": "Waiting for Image",
+      "placeholder.sub": "Upload an apple photo then press <strong style=\"color:var(--green);\">Detect</strong> for AI analysis.",
+      "result.title": "Disease Analysis Results",
+      "spinner.label": "Analyzing image...", "spinner.sub": "MobileNetV2 is working",
+      "conf.title": "Confidence Score",
+      "conf.low": "Low", "conf.mid": "Medium", "conf.high": "High",
+      "info.kondisi": "Condition", "info.estimasi": "Est. Harvest",
+      "info.risiko": "Risk", "info.kelayakan": "Suitability",
+      "solusi.title": "Treatment Recommendations",
+      "airec.title": "AI Analysis — Agricultural Consultant",
+      "detail.kelas": "Class", "detail.akurasi": "Accuracy", "detail.waktu": "Time",
+      "accnote.title": "About Model Accuracy",
+      "accnote.body": "MobileNetV2 was trained on a 4-class apple disease dataset and achieves <strong style=\"color:var(--green);\">98%</strong> accuracy. Best results come from well-lit, focused photos.",
+      "cammodal.title": "Live Photo",
+      "cammodal.hint": "Point the apple into the circle",
+      "cammodal.init": "Initializing camera...",
+      "cammodal.flip": "Flip", "cammodal.capture": "Take Photo",
+      "cammodal.ready": "Camera ready — point the apple into the circle",
+      "cammodal.denied": "Camera permission denied.",
+      "cammodal.unavail": "Camera not available.",
+      "sc.detected": "Detected Disease Class",
+      "err.failedConnect": "Connection Failed",
+      "err.serverNote": "Make sure the Flask server is running and the /predict endpoint is active. Details: ",
+      "meta.normal.kondisi": "Healthy, no disease",
+      "meta.normal.risiko":  "Low",
+      "meta.normal.layak":   "Safe to consume",
+      "meta.normal.kelas":   "Normal Apple",
+      "meta.blotch.kondisi": "Blotch fungal infection",
+      "meta.blotch.risiko":  "Medium",
+      "meta.blotch.layak":   "Partially safe",
+      "meta.blotch.kelas":   "Blotch Apple",
+      "meta.rot.kondisi":    "Advanced decay",
+      "meta.rot.risiko":     "High",
+      "meta.rot.layak":      "Not safe to consume",
+      "meta.rot.kelas":      "Rot Apple",
+      "meta.scab.kondisi":   "Scab fungal infection",
+      "meta.scab.risiko":    "Medium–High",
+      "meta.scab.layak":     "Needs evaluation",
+      "meta.scab.kelas":     "Scab Apple",
+      "cat.mekanis":       "Mechanical",
+      "cat.kimiawi":       "Chemical",
+      "cat.kultur_teknis": "Cultural Practices",
+      "cat.pascapanen":    "Post-Harvest",
+    }
+  };
+
+  let currentLang = localStorage.getItem('sa-lang') || 'id';
+
+  function applyLang(lang) {
+    const tr = translations[lang];
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (tr[key] !== undefined) el.textContent = tr[key];
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      const key = el.getAttribute('data-i18n-html');
+      if (tr[key] !== undefined) el.innerHTML = tr[key];
+    });
+    const nextLang = lang === 'id' ? 'EN' : 'ID';
+    document.querySelectorAll('#lang-label-mobile, #lang-label-desktop').forEach(el => {
+      el.textContent = nextLang;
+    });
+    document.title = lang === 'id'
+      ? 'SmartApple — Deteksi Penyakit Apel'
+      : 'SmartApple — Apple Disease Detection';
+    const btn = document.getElementById('btn-detect');
+    if (!btn.disabled) {
+      document.getElementById('btn-label').textContent = selectedFile ? tr['btn.analyze'] : tr['btn.selectFirst'];
+    }
+  }
+
+  function toggleLang() {
+    currentLang = currentLang === 'id' ? 'en' : 'id';
+    localStorage.setItem('sa-lang', currentLang);
+    applyLang(currentLang);
+  }
+
+  function t(key) { return translations[currentLang][key] || key; }
+
+  applyLang(currentLang);
+
+  function toggleMenu() {
+    const nl = document.getElementById('nav-links');
+    const ic = document.getElementById('menu-icon');
+    const isOpen = nl.classList.toggle('open');
+    ic.className = isOpen ? 'mdi mdi-close' : 'mdi mdi-menu';
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  }
+  document.querySelectorAll('.nav-link, .nav-link-cta').forEach(l => {
+    l.addEventListener('click', () => {
+      document.getElementById('nav-links').classList.remove('open');
+      document.getElementById('menu-icon').className = 'mdi mdi-menu';
+      document.body.style.overflow = '';
+    });
+  });
+  window.addEventListener('scroll', () => {
+    document.getElementById('nav').style.background =
+      window.scrollY > 40 ? 'rgba(8,14,11,0.97)' : 'rgba(8,14,11,0.88)';
+  }, { passive: true });
+
+  function getClassMeta(cls) {
+    const base = {
+      normal: { scClass:'sc-normal', cfClass:'cf-normal', icon:'mdi-check-decagram',  konfColor:'var(--green)'  },
+      blotch: { scClass:'sc-blotch', cfClass:'cf-blotch', icon:'mdi-bacteria-outline', konfColor:'var(--yellow)' },
+      rot:    { scClass:'sc-rot',    cfClass:'cf-rot',    icon:'mdi-skull-outline',    konfColor:'var(--red)'    },
+      scab:   { scClass:'sc-scab',   cfClass:'cf-scab',   icon:'mdi-virus-outline',    konfColor:'var(--purple)' },
+    }[cls] || { scClass:'sc-normal', cfClass:'cf-normal', icon:'mdi-check-decagram', konfColor:'var(--green)' };
+    return {
+      ...base,
+      kondisi: t(`meta.${cls}.kondisi`),
+      risiko:  t(`meta.${cls}.risiko`),
+      layak:   t(`meta.${cls}.layak`),
+      kelas:   t(`meta.${cls}.kelas`),
+    };
+  }
+
+  const SOLUSI_CAT = {
+    mekanis:       { icon:'mdi-wrench-outline',         cls:'mekanis'    },
+    kimiawi:       { icon:'mdi-flask-outline',          cls:'kimiawi'    },
+    kultur_teknis: { icon:'mdi-sprout-outline',         cls:'kultur'     },
+    pascapanen:    { icon:'mdi-package-variant-closed', cls:'pascapanen' },
+  };
+
+  function getClass(label) {
+    const l = (label || '').toLowerCase();
+    if (l.includes('normal')) return 'normal';
+    if (l.includes('blotch')) return 'blotch';
+    if (l.includes('rot'))    return 'rot';
+    if (l.includes('scab'))   return 'scab';
+    return 'normal';
+  }
+
+  let selectedFile = null;
+  let detectStartTime = null;
+
+  function onFileSelected(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setFile(file);
+  }
+
+  function setFile(file) {
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById('preview-img').src = ev.target.result;
+      document.getElementById('prev-name').textContent = file.name;
+      document.getElementById('prev-size').textContent = (file.size / 1024).toFixed(0) + ' KB';
+      document.getElementById('preview-wrap').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+    document.getElementById('upload-zone').classList.add('has-file');
+    document.getElementById('upload-icon').className = 'mdi mdi-check-circle-outline uz-icon';
+    document.getElementById('btn-detect').disabled = false;
+    document.getElementById('btn-label').textContent = t('btn.analyze');
+    document.getElementById('result-card').style.display = 'none';
+    document.getElementById('placeholder-card').style.display = 'flex';
+  }
+
+  async function runDetection() {
+    if (!selectedFile) return;
+    detectStartTime = Date.now();
+    document.getElementById('placeholder-card').style.display = 'none';
+    document.getElementById('result-card').style.display = 'block';
+    document.getElementById('spinner').style.display = 'flex';
+    ['status-card','conf-block','info-grid','solusi-box','ai-rec-box','detail-rows'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+    document.getElementById('conf-fill').style.width = '0%';
+    document.getElementById('btn-detect').disabled = true;
+    document.getElementById('btn-label').textContent = t('btn.analyzing');
+    document.getElementById('btn-reset').style.display = 'none';
+    if (window.innerWidth < 768) {
+      setTimeout(() => document.getElementById('result-card').scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+    }
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    try {
+      const res = await fetch('/predict', { method:'POST', body:formData });
+      if (!res.ok) throw new Error('Server error ' + res.status);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      showResult(data);
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  function showResult(data) {
+    document.getElementById('spinner').style.display = 'none';
+    const elapsed = detectStartTime ? ((Date.now() - detectStartTime) / 1000).toFixed(2) + 's' : '—';
+    const label   = data.label || 'Normal';
+    const cls     = getClass(label);
+    const meta    = getClassMeta(cls);
+    const conf    = parseFloat(data.confidence || 0) * 100;
+    const sc = document.getElementById('status-card');
+    sc.className = 'status-card ' + meta.scClass;
+    sc.style.display = 'flex';
+    sc.innerHTML = `
+      <div class="sc-icon-wrap"><i class="mdi ${meta.icon}"></i></div>
+      <div>
+        <div class="sc-lbl">${t('sc.detected')}</div>
+        <div class="sc-val">${label}</div>
+      </div>`;
+    document.getElementById('conf-block').style.display = 'block';
+    const pctEl = document.getElementById('conf-pct');
+    pctEl.textContent = conf.toFixed(1) + '%';
+    pctEl.style.color = meta.konfColor;
+    const fill = document.getElementById('conf-fill');
+    fill.className = 'conf-fill ' + meta.cfClass;
+    setTimeout(() => { fill.style.width = conf + '%'; }, 80);
+    document.getElementById('info-grid').style.display = 'grid';
+    document.getElementById('val-kondisi').textContent  = data.kondisi        || meta.kondisi;
+    document.getElementById('val-estimasi').textContent = data.estimasi_panen || '—';
+    document.getElementById('val-risiko').textContent   = meta.risiko;
+    document.getElementById('val-layak').textContent    = meta.layak;
+    renderAiRecommendation(data.ai_recommendation);
+    renderSolusi(data.solusi);
+    document.getElementById('detail-rows').style.display = 'block';
+    document.getElementById('val-kelas').textContent   = meta.kelas;
+    document.getElementById('val-akurasi').textContent = conf.toFixed(2) + '%';
+    document.getElementById('val-waktu').textContent   = elapsed;
+    document.getElementById('btn-detect').disabled = false;
+    document.getElementById('btn-label').textContent = t('btn.redetect');
+    document.getElementById('btn-reset').style.display = 'flex';
+  }
+
+  function renderSolusi(solusi) {
+    const box     = document.getElementById('solusi-box');
+    const content = document.getElementById('solusi-content');
+    content.innerHTML = '';
+    if (solusi && typeof solusi === 'object' && !Array.isArray(solusi)) {
+      const keys = Object.keys(solusi);
+      if (keys.length === 0) { box.style.display = 'none'; return; }
+      keys.forEach(key => {
+        const items = solusi[key];
+        if (!items || items.length === 0) return;
+        const cfg = SOLUSI_CAT[key] || { icon:'mdi-chevron-right', cls:'kultur' };
+        const label = t('cat.' + key) || key;
+        const catDiv = document.createElement('div');
+        catDiv.className = 'solusi-category';
+        catDiv.innerHTML = `
+          <div class="solusi-cat-label ${cfg.cls}">
+            <i class="mdi ${cfg.icon}"></i>${label}
+          </div>`;
+        items.forEach(item => {
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'solusi-item';
+          itemDiv.innerHTML = `<i class="mdi mdi-circle-small"></i><span>${item}</span>`;
+          catDiv.appendChild(itemDiv);
+        });
+        content.appendChild(catDiv);
+      });
+      box.style.display = 'block';
+    } else if (solusi && typeof solusi === 'string') {
+      content.innerHTML = `<div class="solusi-item"><i class="mdi mdi-information-outline"></i><span>${solusi}</span></div>`;
+      box.style.display = 'block';
+    } else {
+      box.style.display = 'none';
+    }
+  }
+
+  function renderAiRecommendation(text) {
+    const box     = document.getElementById('ai-rec-box');
+    const content = document.getElementById('ai-rec-content');
+    if (text && typeof text === 'string') {
+      content.textContent = text;
+      box.style.display = 'block';
+    } else {
+      box.style.display = 'none';
+    }
+  }
+
+  function showError(msg) {
+    document.getElementById('spinner').style.display = 'none';
+    const sc = document.getElementById('status-card');
+    sc.className = 'status-card';
+    sc.style.cssText = `
+      display:flex;background:rgba(248,113,113,0.08);
+      border:1px solid rgba(248,113,113,0.25);
+      border-radius:12px;padding:0.9rem 1.1rem;
+      align-items:center;gap:10px;margin-bottom:1.1rem;`;
+    sc.innerHTML = `
+      <div style="width:44px;height:44px;border-radius:11px;background:rgba(248,113,113,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="mdi mdi-wifi-off" style="font-size:1.4rem;color:var(--red);"></i>
+      </div>
+      <div>
+        <div style="font-size:0.62rem;color:var(--muted2);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:0.12rem;">Error</div>
+        <div style="font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;color:var(--red);">${t('err.failedConnect')}</div>
+      </div>`;
+    const box = document.getElementById('solusi-box');
+    const content = document.getElementById('solusi-content');
+    content.innerHTML = `<div class="solusi-item"><i class="mdi mdi-alert-circle-outline" style="color:var(--red);"></i><span>${t('err.serverNote')}${msg}</span></div>`;
+    box.style.display = 'block';
+    document.getElementById('btn-detect').disabled = false;
+    document.getElementById('btn-label').textContent = t('btn.retry');
+    document.getElementById('btn-reset').style.display = 'flex';
+  }
+
+  function resetAll() {
+    selectedFile = null;
+    detectStartTime = null;
+    document.getElementById('file-input').value = '';
+    document.getElementById('preview-wrap').style.display = 'none';
+    document.getElementById('result-card').style.display = 'none';
+    document.getElementById('placeholder-card').style.display = 'flex';
+    document.getElementById('upload-zone').classList.remove('has-file');
+    document.getElementById('upload-icon').className = 'mdi mdi-cloud-upload-outline uz-icon';
+    document.getElementById('btn-detect').disabled = true;
+    document.getElementById('btn-label').textContent = t('btn.selectFirst');
+    document.getElementById('btn-reset').style.display = 'none';
+    document.getElementById('conf-fill').style.width = '0%';
+    document.getElementById('status-card').style.display = 'none';
+    document.getElementById('ai-rec-box').style.display = 'none';
+  }
+
+  function switchTab(tab) {
+    document.getElementById('section-upload').style.display = tab === 'upload' ? 'block' : 'none';
+    document.getElementById('section-camera').style.display = tab === 'camera' ? 'block' : 'none';
+    document.getElementById('tab-upload').classList.toggle('active', tab === 'upload');
+    document.getElementById('tab-camera').classList.toggle('active', tab === 'camera');
+  }
+
+  const uploadZone = document.getElementById('upload-zone');
+  uploadZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    uploadZone.style.borderColor = 'var(--green)';
+    uploadZone.style.background  = 'rgba(74,222,128,0.06)';
+  });
+  uploadZone.addEventListener('dragleave', () => {
+    uploadZone.style.borderColor = '';
+    uploadZone.style.background  = '';
+  });
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadZone.style.borderColor = '';
+    uploadZone.style.background  = '';
+    const file = e.dataTransfer.files[0];
+    const allowed = ['image/jpeg','image/png','image/webp'];
+    if (file && allowed.includes(file.type)) setFile(file);
+  });
+
+  let stream = null;
+  let currentFacingMode = 'environment';
+
+  async function openCamera() {
+    const modal  = document.getElementById('cam-modal');
+    const status = document.getElementById('cam-status');
+    const btn    = document.getElementById('btn-capture');
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    status.textContent = t('cammodal.init');
+    status.className   = 'cam-status';
+    btn.disabled = true;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: currentFacingMode, width: { ideal: 1280 } }
+      });
+      document.getElementById('cam-video').srcObject = stream;
+      btn.disabled = false;
+      status.textContent = t('cammodal.ready');
+      status.classList.add('ok');
+    } catch (err) {
+      status.textContent = err.name === 'NotAllowedError' ? t('cammodal.denied') : t('cammodal.unavail');
+      status.classList.add('error');
+    }
+  }
+
+  function closeCamera() {
+    document.getElementById('cam-modal').classList.remove('open');
+    document.body.style.overflow = '';
+    if (stream) { stream.getTracks().forEach(tr => tr.stop()); stream = null; }
+    document.getElementById('cam-video').srcObject = null;
+    document.getElementById('btn-capture').disabled = true;
+  }
+
+  function switchCamera() {
+    currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+    if (stream) stream.getTracks().forEach(tr => tr.stop());
+    openCamera();
+  }
+
+  function capturePhoto() {
+    const video  = document.getElementById('cam-video');
+    const canvas = document.getElementById('cam-canvas');
+    canvas.width  = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (currentFacingMode === 'user') {
+      ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
+    }
+    ctx.drawImage(video, 0, 0);
+    canvas.toBlob(blob => {
+      const ts   = new Date().toISOString().slice(0,19).replace(/[:.]/g, '-');
+      const file = new File([blob], `smartapple-${ts}.jpg`, { type:'image/jpeg' });
+      setFile(file);
+      closeCamera();
+      switchTab('upload');
+    }, 'image/jpeg', 0.92);
+  }
+
+  document.getElementById('cam-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('cam-modal')) closeCamera();
+  });
+</script>
+</body>
+</html>

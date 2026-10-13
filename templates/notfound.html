@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartApple - Halaman Tidak Ditemukan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f9fafb; color: #111827; line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ── Navbar ── */
+    nav { background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 200; }
+    .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { font-weight: 800; font-size: 1.15rem; color: #16a34a; text-decoration: none; display: flex; align-items: center; gap: 7px; }
+    .nav-brand i { font-size: 1.4rem; }
+    .nav-links { list-style: none; display: flex; gap: 0.25rem; }
+    .nav-link { text-decoration: none; color: #374151; font-size: 0.9rem; font-weight: 500; padding: 0.4rem 0.85rem; border-radius: 7px; transition: background 0.15s, color 0.15s; }
+    .nav-link:hover { background: #f0fdf4; color: #16a34a; }
+    .nav-toggle { display: none; background: none; border: none; cursor: pointer; font-size: 1.5rem; color: #374151; }
+    @media (max-width: 640px) {
+      .nav-toggle { display: block; }
+      .nav-links { display: none; flex-direction: column; position: absolute; top: 58px; left: 0; right: 0; background: #fff; border-bottom: 1px solid #e5e7eb; padding: 0.75rem 1.5rem 1rem; gap: 0.1rem; }
+      .nav-links.open { display: flex; }
+    }
+
+    /* ── 404 content ── */
+    .four-wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 1.5rem; text-align: center; }
+    .four-inner { max-width: 520px; }
+
+    .apple-404 { position: relative; display: inline-block; margin-bottom: 1.5rem; }
+    .apple-404 i.apple-icon { font-size: 7rem; color: #16a34a; display: block; animation: wobble 2.5s ease-in-out infinite; filter: drop-shadow(0 8px 24px rgba(22,163,74,0.18)); }
+    .badge-404 { position: absolute; top: -8px; right: -18px; background: #ef4444; color: #fff; font-weight: 800; font-size: 0.85rem; padding: 0.25rem 0.65rem; border-radius: 99px; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    @keyframes wobble {
+      0%,100% { transform: rotate(-3deg) translateY(0); }
+      25%      { transform: rotate(3deg)  translateY(-6px); }
+      75%      { transform: rotate(-2deg) translateY(-3px); }
+    }
+
+    .num-404 { font-size: clamp(4rem, 12vw, 7rem); font-weight: 900; color: #e5e7eb; letter-spacing: -4px; line-height: 1; margin-bottom: 0.5rem; }
+    h1 { font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 0.6rem; }
+    .sub { color: #6b7280; font-size: 0.95rem; margin-bottom: 2rem; max-width: 380px; margin-left: auto; margin-right: auto; }
+
+    .btn-group { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+    .btn-green { display: inline-flex; align-items: center; gap: 8px; background: #16a34a; color: #fff; font-weight: 600; font-size: 0.95rem; padding: 0.75rem 1.6rem; border-radius: 9px; text-decoration: none; border: none; transition: background 0.15s, transform 0.12s; }
+    .btn-green:hover { background: #15803d; transform: translateY(-2px); }
+    .btn-outline { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: #374151; font-weight: 600; font-size: 0.95rem; padding: 0.75rem 1.6rem; border-radius: 9px; text-decoration: none; border: 1px solid #e5e7eb; transition: background 0.15s; }
+    .btn-outline:hover { background: #f3f4f6; }
+
+    /* Quick links */
+    .quick-links { margin-top: 2.5rem; }
+    .quick-title { font-size: 0.82rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 0.85rem; }
+    .quick-grid { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+    .quick-btn { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #e5e7eb; color: #374151; border-radius: 9px; padding: 0.5rem 1rem; font-size: 0.85rem; text-decoration: none; font-weight: 500; transition: background 0.12s, border-color 0.12s, color 0.12s; }
+    .quick-btn:hover { background: #f0fdf4; border-color: #16a34a; color: #16a34a; }
+    .quick-btn i { font-size: 0.95rem; }
+
+    footer { background: #1f2937; color: #9ca3af; text-align: center; padding: 1.5rem; font-size: 0.83rem; }
+    footer a { color: #6ee7b7; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-brand" href="/"><i class="mdi mdi-apple"></i> SmartApple</a>
+    <button class="nav-toggle" onclick="toggleMenu()"><i class="mdi mdi-menu" id="menu-icon"></i></button>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="index.html" class="nav-link active">Beranda</a></li>
+      <li><a href="detectionpage.html" class="nav-link">Deteksi</a></li>
+      <li><a href="historypage.html" class="nav-link">Riwayat</a></li>
+      <li><a href="aboutpage.html" class="nav-link">Tentang</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="four-wrap">
+  <div class="four-inner">
+
+    <div class="apple-404" data-aos="zoom-in" data-aos-duration="600">
+      <i class="mdi mdi-apple apple-icon"></i>
+      <span class="badge-404">404</span>
+    </div>
+
+    <div class="num-404" data-aos="fade-up" data-aos-delay="100">404</div>
+    <h1 data-aos="fade-up" data-aos-delay="180">Halaman Tidak Ditemukan</h1>
+    <p class="sub" data-aos="fade-up" data-aos-delay="240">
+      Halaman yang Anda cari tidak ada atau mungkin telah dipindahkan. Jangan khawatir, Anda bisa kembali ke halaman utama.
+    </p>
+
+    <div class="btn-group" data-aos="fade-up" data-aos-delay="300">
+      <a href="/" class="btn-green"><i class="mdi mdi-home-outline"></i> Ke Beranda</a>
+      <a href="javascript:history.back()" class="btn-outline"><i class="mdi mdi-arrow-left"></i> Kembali</a>
+    </div>
+
+    <div class="quick-links" data-aos="fade-up" data-aos-delay="380">
+      <div class="quick-title">Atau langsung ke halaman</div>
+      <div class="quick-grid">
+        <a href="/deteksi" class="quick-btn"><i class="mdi mdi-magnify-scan"></i> Deteksi</a>
+        <a href="/riwayat" class="quick-btn"><i class="mdi mdi-history"></i> Riwayat</a>
+        <a href="/tentang" class="quick-btn"><i class="mdi mdi-information-outline"></i> Tentang</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <p>&copy; 2024 <strong style="color:#d1fae5;">SmartApple</strong> &mdash; Powered by MobileNetV2 &nbsp;|&nbsp; <a href="/">Beranda</a></p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script>
+  AOS.init({ duration: 550, once: true });
+  function toggleMenu() {
+    const nl = document.getElementById('nav-links');
+    const ic = document.getElementById('menu-icon');
+    nl.classList.toggle('open');
+    ic.className = nl.classList.contains('open') ? 'mdi mdi-close' : 'mdi mdi-menu';
+  }
+</script>
+</body>
+</html>
